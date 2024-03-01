@@ -36,7 +36,7 @@ userRoutes.post(
         res.status(400).send({ error: "user with that email already exists" });
         return;
       } else {
-        console.log(e);
+        console.error(e);
         exit(1);
       }
     }
@@ -61,7 +61,7 @@ userRoutes.post("/login", betterJson, async (req: Request, res: Response) => {
       res.status(400).send({ error: "user does not exist with those details" });
       return;
     } else {
-      console.log(e);
+      console.error(e);
       exit(1);
     }
   }

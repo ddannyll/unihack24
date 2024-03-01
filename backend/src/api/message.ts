@@ -37,7 +37,7 @@ messageRoutes.get("/loadmessages/:userId", async (req, res) => {
         .send({ error: "user or meetup does not exist with given ids" });
       return;
     } else {
-      console.log(e);
+      console.error(e);
       exit(1);
     }
   }
@@ -79,7 +79,7 @@ messageRoutes.get("/messageList/:userId", async (req, res) => {
       res.status(400).send({ error: "user with id does not exist" });
       return;
     } else {
-      console.log(e);
+      console.error(e);
       exit(1);
     }
   }
@@ -131,7 +131,7 @@ messageRoutes.post(
         res.status(400).send({ error: "user or meetup does not exist" });
         return;
       } else {
-        console.log(e);
+        console.error(e);
         exit(1);
       }
     }
