@@ -1,4 +1,4 @@
-import prismaClient from "prisma.ts";
+import { prismaClient } from "./prisma.js";
 
 async function getDesiredActivities() {
   let activities: { [key: string]: string[] } = {};
@@ -246,7 +246,7 @@ async function multiMatchmake() {
 async function matchmakingStartSearch(
   userId: string,
   activities: string[],
-  preferenceGender: "male" | "female" | "both",
+  preferenceGender: "male" | "female" | "other",
   preferenceMaxRadius: number,
   preferenceMinPeople: number,
 ) {
@@ -275,5 +275,3 @@ async function matchmakingStopsearch(userId: string) {
     },
   });
 }
-
-export default matchmakingStartSearch;

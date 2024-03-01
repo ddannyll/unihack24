@@ -12,7 +12,7 @@ const userRoutes = Router();
 interface userAuthParams {
   email: string;
   password: string;
-  gender: string;
+  gender: "male" | "female" | "other";
 }
 
 userRoutes.post(
