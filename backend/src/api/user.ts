@@ -5,6 +5,7 @@ import { randomUUID } from "crypto";
 import hashPassword from "../helpers/hashPassword.js";
 import violateUniqueConstraint from "../helpers/violateUniqueConstraint.js";
 import notFound from "../helpers/notFound.js";
+import { exit } from "process";
 
 const userRoutes = Router();
 
@@ -34,6 +35,9 @@ userRoutes.post(
       if (violateUniqueConstraint(e as object)) {
         res.status(400).send({ error: "user with that email already exists" });
         return;
+      } else {
+        console.log(e);
+        exit(1);
       }
     }
 
@@ -56,6 +60,9 @@ userRoutes.post("/login", betterJson, async (req: Request, res: Response) => {
     if (notFound(e as object)) {
       res.status(400).send({ error: "user does not exist with those details" });
       return;
+    } else {
+      console.log(e);
+      exit(1);
     }
   }
 
