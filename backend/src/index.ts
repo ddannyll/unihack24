@@ -1,14 +1,17 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express, Request, Response, json } from "express";
 import dotenv from "dotenv";
 import { prismaClient } from "./prisma.js";
+import undefinedNullMiddleware from "./middleware/undefinedNull.js";
 
 dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Express + TypeScript Server");
+app.use(undefinedNullMiddleware);
+
+app.get("/", (_: Request, res: Response) => {
+  res.send("Hello World!");
 });
 
 app.listen(port, () => {
