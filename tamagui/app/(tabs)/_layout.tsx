@@ -15,7 +15,7 @@ export default function TabLayout() {
           title: 'Tab One',
           tabBarIcon: ({ color }) => <Text>Hello!</Text>,
           headerRight: () => (
-            <Link href="/modal" asChild>
+            <Link href="/login" asChild>
               <Pressable>
                 <Text>Hello!</Text>
               </Pressable>
