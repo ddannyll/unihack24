@@ -6,7 +6,7 @@ async function getDesiredActivities() {
   let allRecords = await prismaClient.mMQueueElement.findMany();
 
   for (let record of allRecords) {
-    for (let activity of record["activities"]) {
+    for (let activity of record["activities"].split(",")) {
       if (!(activity in activities)) {
         activities[activity] = [record["userId"]];
       } else {
@@ -14,7 +14,7 @@ async function getDesiredActivities() {
       }
     }
   }
-
+  console.log(activities)
   return activities;
 }
 
@@ -93,30 +93,40 @@ function calculateDistance(
   return distance * 1000;
 }
 
-async function checkCompatibility(userId1: any, userId2: any) {
-  let userRecord1 = await prismaClient.user.findUnique({
+async function checkCompatibility(userId1: string, userId2: string) {
+  let userRecord1 = await prismaClient.user.findFirst({
     where: {
       userId: userId1,
     },
   });
 
-  let userRecord2 = await prismaClient.user.findUnique({
+  let userRecord2 = await prismaClient.user.findFirst({
     where: {
       userId: userId2,
     },
   });
 
-  let userSearch1 = await prismaClient.mMQueueElement.findUnique({
+  let userSearch1 = await prismaClient.mMQueueElement.findFirst({
     where: {
       userId: userId1,
     },
   });
 
-  let userSearch2 = await prismaClient.mMQueueElement.findUnique({
+  let userSearch2 = await prismaClient.mMQueueElement.findFirst({
     where: {
       userId: userId2,
     },
   });
+
+  if (userRecord1 == null || userRecord2 == null) {
+    console.error("User record not found");
+    return false;
+  }
+
+  if (userSearch1 == null || userSearch2 == null) {
+    console.error("User search not found");
+    return false;
+  }
 
   if (userRecord1["gender"] != "both" || userRecord1["gender"] != "both") {
     if (userRecord1["gender"] != userSearch2["preferenceGender"]) {
@@ -206,7 +216,7 @@ async function multiMatchmake() {
         //min attendee requirements.
         let minRequirements: Requirement[] = [];
         for (let id of userIds) {
-          let record = await prismaClient.mMQueueElement.findUnique({
+          let record: any = await prismaClient.mMQueueElement.findFirst({
             where: {
               userId: id,
             },
@@ -242,7 +252,7 @@ async function multiMatchmake() {
   }
 }
 
-//Adds a user & their preferences to the matchmaking queue
+//Adds a user & their preferences to the matchmaking queue 
 async function matchmakingStartSearch(
   userId: string,
   activities: string[],
@@ -250,22 +260,26 @@ async function matchmakingStartSearch(
   preferenceMaxRadius: number,
   preferenceMinPeople: number,
 ) {
-  //Delete any that might be in there (precaution)
-  matchmakingStopsearch(userId);
+  // Call the function to stop any existing search. Ensure it's properly implemented.
+  await matchmakingStopsearch(userId);
+
+  let activitiesString = activities.join(",");
 
   // Add to the MMQueue
-  await prismaClient.mMQueueElement.create({
+  const result = await prismaClient.mMQueueElement.create({
     data: {
-      userId,
-      activities,
-      preferenceGender,
-      preferenceMaxRadius,
-      preferenceMinPeople,
+      userId: userId,
+      activities: activitiesString,
+      preferenceGender: preferenceGender, // Assuming "other" is handled in your schema or converted accordingly
+      preferenceMaxRadius: preferenceMaxRadius,
+      preferenceMinPeople: preferenceMinPeople,
     },
   });
-
-  return {};
+  console.log("hi")
+  return result; // Return the result which includes the added matchmaking preferences
 }
+
+ 
 
 //Cancel's a user's search for matchmaking.
 async function matchmakingStopsearch(userId: string) {
@@ -275,3 +289,5 @@ async function matchmakingStopsearch(userId: string) {
     },
   });
 }
+
+export { matchmakingStartSearch, matchmakingStopsearch, pairMatchmake};

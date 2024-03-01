@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./dev.db"
 }
 
 model User {
@@ -50,18 +50,17 @@ model Message {
 }
 
 model MMQueueElement {
-  MMQueueElementId    String     @id
-  userId              String
-  user                User       @relation(fields: [userId], references: [userId])
-  activities          Activity[] // Assuming activities are stored as a comma-separated list
-  preferenceGender    String // "male", "female", "both"
+  MMQueueElementId    String   @id @default(uuid()) // For UUID generation
+  userId              String   
+  user                User     @relation(fields: [userId], references: [userId])
+  activities          String
+  preferenceGender    String
   preferenceMaxRadius Float
-  preferenceMinPeople Int
+  preferenceMinPeople Int 
 }
-
-model Activity {
-  activityId     String         @id
-  queueElement   MMQueueElement @relation(fields: [queueElementId], references: [MMQueueElementId])
-  queueElementId String
-  activityName   String
-}
+// model Activity {
+//   activityId     String         @id
+//   queueElement   MMQueueElement @relation(fields: [queueElementId], references: [MMQueueElementId])
+//   queueElementId String
+//   activityName   String
+// }
