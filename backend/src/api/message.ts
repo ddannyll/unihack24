@@ -6,6 +6,8 @@ import hashPassword from "../helpers/hashPassword.js";
 import violateUniqueConstraint from "../helpers/violateUniqueConstraint.js";
 import notFound from "../helpers/notFound.js";
 import { timeStamp } from "console";
+import { Message } from "@prisma/client";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 const messageRoutes = Router();
 
@@ -78,5 +80,54 @@ messageRoutes.get("/messageList/:userId", async (req, res) => {
     }
   }
   // user should exist
-  let meetupPreviews = user?.meetups;
+  const meetupPreviews = user?.meetups.map((meetup) => {
+    return {
+      meetupId: meetup.meetupId,
+      meetupName: meetup.name,
+      meetupMsgPreview: meetup.messages.at(0)?.message ?? "",
+      meetupDateLastMsg: meetup.messages.at(0)?.timeStamp ?? Date(),
+    };
+  });
+
+  res.send({ meetups: meetupPreviews });
 });
+
+interface messageParams {
+  userId: string;
+  meetupId: string;
+  message: string;
+}
+
+messageRoutes.post(
+  "/sendMessage",
+  betterJson,
+  async (req: Request, res: Response) => {
+    const info: messageParams = req.body;
+    try {
+      await prismaClient.message.create({
+        data: {
+          messageId: randomUUID(),
+          message: info.message,
+          fromUser: {
+            connect: {
+              userId: info.userId,
+            },
+          },
+          meetup: {
+            connect: {
+              meetupId: info.meetupId,
+            },
+          },
+          timeStamp: Date(),
+        },
+      });
+    } catch (e) {
+      if (notFound(e as object)) {
+        res.status(400).send({ error: "user or meetup does not exist" });
+        return;
+      }
+    }
+
+    res.send({});
+  },
+);

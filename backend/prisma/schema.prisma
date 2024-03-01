@@ -47,7 +47,6 @@ model Message {
   fromUser   User     @relation(fields: [fromUserId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
   fromUserId String
   meetup     Meetup[]
-  meetupId   String
 }
 
 model MMQueueElement {
