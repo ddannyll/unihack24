@@ -11,40 +11,39 @@ datasource db {
 }
 
 model User {
-  id             Int       @id
+  id             String    @id
   email          String    @unique
-  name           String
   hashPassword   String
   bio            String?
   profilePicture String?
   searching      Boolean   @default(false)
   user           Tag[]
-  longitude      Float
-  latitude       Float
+  longitude      Float     @default(0)
+  latitude       Float     @default(0)
   meetup         Meetup[]
   Message        Message[]
 }
 
 model Tag {
-  id         Int    @id
+  id         String @id
   name       String @unique
   numberUsed Int    @default(0)
   users      User[]
 }
 
 model Meetup {
-  id       Int       @id
+  id       String    @id
   users    User[]
   messages Message[]
   name     String
 }
 
 model Message {
-  id         Int      @id
+  id         String   @id
   message    String
   timeStamp  DateTime
   fromUser   User     @relation(fields: [fromUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  fromUserId Int
+  fromUserId String
   Meetup     Meetup   @relation(fields: [meetupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  meetupId   Int
+  meetupId   String
 }
