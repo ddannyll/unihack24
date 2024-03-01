@@ -7,7 +7,7 @@
     "lint": "npx eslint .",
     "migrate": "npx prisma migrate dev",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
-    "generate": "npx prisma generate"
+    "db_push": "npx prisma db push"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
