@@ -70,9 +70,31 @@ function createOptimalGroups(people: Requirement[]) {
   return groups.map(group=>group.map(x=>x.id))
 }
 
+function calculateDistance(lat1:number, lon1:number, lat2:number, lon2:number) {
+  // Radius of the Earth in km
+  const R = 6371;
+
+  // Convert degrees to radians
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+
+  // Convert latitudes to radians
+  const lat1InRad = lat1 * (Math.PI / 180);
+  const lat2InRad = lat2 * (Math.PI / 180);
+
+  // Apply Haversine formula
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1InRad) * Math.cos(lat2InRad); 
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+  const distance = R * c;
+
+  // Convert distance from km to meters
+  return distance * 1000;
+}
 
 
-function checkCompatibility(userId1:any, userId2:any) : Boolean {
+
+async function checkCompatibility(userId1:any, userId2:any) {
   let userRecord1  = await prismaClient.user.findUnique({
     where:{
       userId: userId1
@@ -98,15 +120,38 @@ function checkCompatibility(userId1:any, userId2:any) : Boolean {
     }
   });
 
-  if(userRecord1['gender'] == )
+  if(userRecord1['gender'] != "both" || userRecord1['gender'] != "both"){
+    if(userRecord1['gender'] != userSearch2['preferenceGender']){
+      return false;
+    }
+
+    if(userRecord2['gender'] != userSearch1['preferenceGender']){
+      return false;
+    }
+  }
 
 
+  if(calculateDistance(userRecord1['latitude'],userRecord1['longitude'], userRecord2['latitude'],userRecord2['longitude']) > Math.max(userSearch1['preferenceMaxRadius'], userSearch2['preferenceMaxRadius'])){
+    return false;
+  }
+
+
+  return true;
 }
 
 
-async function galeShapely(){
-  //this is only for one on one.
+async function curateFeed(){
+
+}
+
+//this should work.
+async function pairMatchmake(){
+  //these are valid pairings
+  //string, string[]
+  //activity, pairs of ids
+  let validPairings:{ [key: string]: string[][] } = {}
  
+  
   let desiredActivities = getDesiredActivities();
    
   let sortedActivities:  [string, string[]][] = Object.entries(desiredActivities);
@@ -117,36 +162,28 @@ async function galeShapely(){
     let currActivity = sortedActivities[i];
     let userIds : string[] = currActivity[1];
 
-    let validPairings = []
-
-    for(let id of userIds){
-      let userRecord  = await prismaClient.findUnique({
-        where:{
-          userId: id
-        }
-      });
-    }
-
+     
     for(let i = 0; i< userIds.length; i++){
       for(let j = i+1; j<userIds.length; j++){
-        
-
-        if()
-
-
-
+        if(await checkCompatibility(userIds[i], userIds[j]) ==true){
+          if(currActivity[0] in validPairings){
+            validPairings[currActivity[0]].push([userIds[i], userIds[j]])
+          }else{
+            validPairings[currActivity[0]] = [[userIds[i], userIds[j]]]
+          } 
+        }
       }
     }
-    
-
-    
-    
-
   }
 
+  return validPairings;
+  //looks like 
+  //{'basketball': [["123", "533"], ["4141", "333"]]}...
 }
 
-async function matchmake() {
+
+//this doens't work this is half made
+async function multiMatchmake() {
     while (true) {
       try {
         let matches: string[][] = []
