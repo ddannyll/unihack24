@@ -8,24 +8,26 @@ import notFound from "../helpers/notFound.js";
 
 const userRoutes = Router();
 
-interface userAuthInfo {
+interface userAuthParams {
   email: string;
   password: string;
+  gender: string;
 }
 
 userRoutes.post(
   "/register",
   betterJson,
   async (req: Request, res: Response) => {
-    const info: userAuthInfo = req.body;
+    const info: userAuthParams = req.body;
 
-    const id = randomUUID();
+    const userId = randomUUID();
     try {
       await prismaClient.user.create({
         data: {
-          id,
+          userId,
           email: info.email,
           hashPassword: hashPassword(info.password),
+          gender: info.gender,
         },
       });
     } catch (e) {
@@ -35,12 +37,12 @@ userRoutes.post(
       }
     }
 
-    res.send({ userId: id });
+    res.send({ userId });
   },
 );
 
 userRoutes.post("/login", betterJson, async (req: Request, res: Response) => {
-  const info: userAuthInfo = req.body;
+  const info: userAuthParams = req.body;
 
   let user;
   try {
@@ -58,7 +60,7 @@ userRoutes.post("/login", betterJson, async (req: Request, res: Response) => {
   }
 
   // should never be undefined
-  res.send({ userId: user?.id });
+  res.send({ userId: user?.userId });
 });
 
 export default userRoutes;
