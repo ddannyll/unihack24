@@ -17,10 +17,10 @@ messageRoutes.get("/loadmessages/:userId", async (req, res) => {
   try {
     meetup = await prismaClient.meetup.findFirst({
       where: {
-        id: meetupId,
+        meetupId: meetupId,
         users: {
           some: {
-            id: userId,
+            userId: userId,
           },
         },
       },
@@ -57,10 +57,10 @@ messageRoutes.get("/messageList/:userId", async (req, res) => {
   try {
     user = await prismaClient.user.findFirst({
       where: {
-        id: userId,
+        userId,
       },
       include: {
-        meetup: {
+        meetups: {
           include: {
             messages: {
               orderBy: {
@@ -78,5 +78,5 @@ messageRoutes.get("/messageList/:userId", async (req, res) => {
     }
   }
   // user should exist
-  let meetupPreviews = user?.meetup;
+  let meetupPreviews = user?.meetups;
 });

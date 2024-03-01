@@ -11,49 +11,58 @@ datasource db {
 }
 
 model User {
-  userId             Int       @id
-  email          String    @unique
+  userId         String           @id
+  email          String           @unique
   hashPassword   String
   bio            String?
   profilePicture String?
-  searching      Boolean   @default(false)
-  user           Tag[]
-  longitude      Float     @default(0)
-  latitude       Float     @default(0)
-  gender         string 
-  meetup         Meetup[]
-  Message        Message[]
+  searching      Boolean          @default(false)
+  tags           Tag[]
+  longitude      Float            @default(0)
+  latitude       Float            @default(0)
+  gender         String
+  meetups        Meetup[]
+  message        Message[]
+  MMQueueElement MMQueueElement[]
 }
 
 model Tag {
-  tagId         Int    @id
+  tagId      String @id
   name       String @unique
   numberUsed Int    @default(0)
   users      User[]
 }
 
-model Chat {
-  chatId       Int       @id
+model Meetup {
+  meetupId String    @id
   users    User[]
   messages Message[]
   name     String
 }
 
 model Message {
-  messageId         Int      @id
+  messageId  String   @id
   message    String
   timeStamp  DateTime
-  fromUser   User     @relation(fields: [fromUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  fromUser   User     @relation(fields: [fromUserId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
   fromUserId String
-  Meetup     Meetup   @relation(fields: [meetupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  meetup     Meetup[]
   meetupId   String
 }
 
 model MMQueueElement {
-  userId              Int @id 
-  user                User     @relation(fields: [userId], references: [id])
-  activities          String[] // Assuming activities are stored as a comma-separated list
-  preferenceGender    String   // "male", "female", "both"
+  MMQueueElementId    String     @id
+  userId              String
+  user                User       @relation(fields: [userId], references: [userId])
+  activities          Activity[] // Assuming activities are stored as a comma-separated list
+  preferenceGender    String // "male", "female", "both"
   preferenceMaxRadius Float
   preferenceMinPeople Int
+}
+
+model Activity {
+  activityId     String         @id
+  queueElement   MMQueueElement @relation(fields: [queueElementId], references: [MMQueueElementId])
+  queueElementId String
+  activityName   String
 }

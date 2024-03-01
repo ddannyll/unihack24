@@ -11,6 +11,7 @@ const userRoutes = Router();
 interface userAuthParams {
   email: string;
   password: string;
+  gender: string;
 }
 
 userRoutes.post(
@@ -19,13 +20,14 @@ userRoutes.post(
   async (req: Request, res: Response) => {
     const info: userAuthParams = req.body;
 
-    const id = randomUUID();
+    const userId = randomUUID();
     try {
       await prismaClient.user.create({
         data: {
-          id,
+          userId,
           email: info.email,
           hashPassword: hashPassword(info.password),
+          gender: info.gender,
         },
       });
     } catch (e) {
@@ -35,7 +37,7 @@ userRoutes.post(
       }
     }
 
-    res.send({ userId: id });
+    res.send({ userId });
   },
 );
 
@@ -58,7 +60,7 @@ userRoutes.post("/login", betterJson, async (req: Request, res: Response) => {
   }
 
   // should never be undefined
-  res.send({ userId: user?.id });
+  res.send({ userId: user?.userId });
 });
 
 export default userRoutes;
