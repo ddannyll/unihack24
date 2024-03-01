@@ -11,18 +11,40 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
-  posts Post[]
+  id             Int       @id
+  email          String    @unique
+  name           String
+  hashPassword   String
+  bio            String?
+  profilePicture String?
+  searching      Boolean   @default(false)
+  user           Tag[]
+  longitude      Float
+  latitude       Float
+  meetup         Meetup[]
+  Message        Message[]
 }
 
-model Post {
-  id        Int     @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean @default(false)
-  author    User    @relation(fields: [authorId], references: [id])
-  authorId  Int
+model Tag {
+  id         Int    @id
+  name       String @unique
+  numberUsed Int    @default(0)
+  users      User[]
 }
 
+model Meetup {
+  id       Int       @id
+  users    User[]
+  messages Message[]
+  name     String
+}
+
+model Message {
+  id         Int      @id
+  message    String
+  timeStamp  DateTime
+  fromUser   User     @relation(fields: [fromUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  fromUserId Int
+  Meetup     Meetup   @relation(fields: [meetupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  meetupId   Int
+}
