@@ -4,7 +4,9 @@ import { prismaClient } from "./prisma.js";
 
 
 
-import { userRegister } from 'user.ts';
+import { userRegister, userLogin } from 'user.ts';
+
+import {startMatchmaking} from 'matchmaking.ts'
 
 dotenv.config();
 
@@ -17,15 +19,34 @@ app.get("/", (req: Request, res: Response) => {
 
 
 app.post("/user/register", (req: Request, res: Response) => {
-  userRegister(req)
-  res.send("THis should register a user")
+  const response = userRegister(req)
+  res.json(response);
 });
 
 
+
+app.post("/user/login", (req: Request, res: Response) => {
+  const response = userLogin(req)
+  if('error' in response){
+    return res.json(response);
+  }
+
+  res.json(response);
+});
+
+
+
+app.post("/matchmaking/startsearch", (req: Request, res: Response) => {
+  
+});
+ 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
-});
 
+  startMatchmaking().catch(error => {
+    console.error('Matchmaking process encountered an unrecoverable error:', error);
+  });
+});
 ////// 
 
 
