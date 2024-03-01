@@ -13,6 +13,7 @@ const loginUser = async ({ email, password }: LoginCredentials) => {
         // 'https://yourapi.com/user/login' if you're in production, or
         // 'http://localhost:3000/user/login' if you're in development.
         // can do this using env file
+        return { userId: "3"}
         const response = await fetch('user/login', {
             method: 'POST',
             headers: {
@@ -44,7 +45,7 @@ export default function Login() {
 
     const handleSubmit = async () => {
         const res = await loginUser({ email, password });
-        router.push('/dashboard')
+        router.push('/(tabs)')
     }
 
     return (
