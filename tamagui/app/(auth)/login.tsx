@@ -1,4 +1,4 @@
-import { Link } from "expo-router"
+import { Link, useRouter } from "expo-router"
 import { useState } from "react"
 import { Button, Form, Input, Label, Text, View, styled } from "tamagui"
 import { useMutation } from '@tanstack/react-query';
@@ -8,33 +8,43 @@ type LoginCredentials = {
     password: string;
 };
 
+const loginUser = async ({ email, password }: LoginCredentials) => {
+    try {
+        // 'https://yourapi.com/user/login' if you're in production, or
+        // 'http://localhost:3000/user/login' if you're in development.
+        // can do this using env file
+        const response = await fetch('user/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+        });
+
+        if (!response.ok) {
+            // If the server response is not ok, throw an error with the response status
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Login failed');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+}
+
 export default function Login() {    
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
+    const router = useRouter();
+
 
     const handleSubmit = async () => {
-        try {
-            const response = await fetch('user/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
-
-            if (!response.ok) {
-                // If the server response is not ok, throw an error with the response status
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Login failed');
-            }
-
-            const data = await response.json();
-            return data;
-        } catch (err) {
-            console.error(err);
-            throw err;
-        }
+        const res = await loginUser({ email, password });
+        router.push('/dashboard')
     }
 
     return (
