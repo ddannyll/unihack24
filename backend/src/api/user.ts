@@ -8,7 +8,7 @@ import notFound from "../helpers/notFound.js";
 
 const userRoutes = Router();
 
-interface userAuthInfo {
+interface userAuthParams {
   email: string;
   password: string;
 }
@@ -17,7 +17,7 @@ userRoutes.post(
   "/register",
   betterJson,
   async (req: Request, res: Response) => {
-    const info: userAuthInfo = req.body;
+    const info: userAuthParams = req.body;
 
     const id = randomUUID();
     try {
@@ -40,7 +40,7 @@ userRoutes.post(
 );
 
 userRoutes.post("/login", betterJson, async (req: Request, res: Response) => {
-  const info: userAuthInfo = req.body;
+  const info: userAuthParams = req.body;
 
   let user;
   try {

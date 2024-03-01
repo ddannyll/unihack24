@@ -1,4 +1,4 @@
-import express, { Express, Request, Response, json } from "express";
+import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import { prismaClient } from "./prisma.js";
 import usersRoutes from "./api/user.js";
@@ -8,7 +8,8 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 3000;
 
-app.get("/", (_: Request, res: Response) => {
+app.get("/", (req: Request, res: Response) => {
+  console.log(req.query);
   res.send("Hello World!");
 });
 
