@@ -11,7 +11,7 @@ datasource db {
 }
 
 model User {
-  id             String    @id
+  userId             Int       @id
   email          String    @unique
   hashPassword   String
   bio            String?
@@ -20,30 +20,40 @@ model User {
   user           Tag[]
   longitude      Float     @default(0)
   latitude       Float     @default(0)
+  gender         string 
   meetup         Meetup[]
   Message        Message[]
 }
 
 model Tag {
-  id         String @id
+  tagId         Int    @id
   name       String @unique
   numberUsed Int    @default(0)
   users      User[]
 }
 
-model Meetup {
-  id       String    @id
+model Chat {
+  chatId       Int       @id
   users    User[]
   messages Message[]
   name     String
 }
 
 model Message {
-  id         String   @id
+  messageId         Int      @id
   message    String
   timeStamp  DateTime
   fromUser   User     @relation(fields: [fromUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   fromUserId String
   Meetup     Meetup   @relation(fields: [meetupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   meetupId   String
+}
+
+model MMQueueElement {
+  userId              Int @id 
+  user                User     @relation(fields: [userId], references: [id])
+  activities          String[] // Assuming activities are stored as a comma-separated list
+  preferenceGender    String   // "male", "female", "both"
+  preferenceMaxRadius Float
+  preferenceMinPeople Int
 }
