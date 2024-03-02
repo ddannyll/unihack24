@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { prismaClient } from "../prisma.js";
+import { prismaClient } from "../clients.js";
 import betterJson from "../middleware/betterJson.js";
 // import { randomUUID } from "crypto";
  
