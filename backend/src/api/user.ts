@@ -83,11 +83,11 @@ userRoutes.post("/login", betterJson, async (req: Request, res: Response) => {
 
 interface userProfileUpdateParams {
   userId: string;
-  email: string | undefined | null;
-  bio: string | undefined | null;
-  profilePicture: string | undefined | null;
-  searching: boolean | undefined | null;
-  gender: "male" | "female" | undefined | null;
+  email?: string;
+  bio?: string;
+  profilePicture?: string;
+  searching?: boolean;
+  gender?: "male" | "female";
 }
 
 userRoutes.put("/", betterJson, async (req: Request, res: Response) => {

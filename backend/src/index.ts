@@ -3,13 +3,19 @@ import dotenv from "dotenv";
 import { prismaClient } from "./prisma.js";
 import usersRoutes from "./api/user.js";
 import messageRoutes from "./api/message.js";
-
-// import startMatchMaking from "./matchmaking.js";
-
-dotenv.config();
-
 import cors from "cors";
 import authenticateToken from "./middleware/auth.js";
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Express {
+    export interface Request {
+      userId?: string;
+    }
+  }
+}
+
+dotenv.config();
 
 const app: Express = express();
 
