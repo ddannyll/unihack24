@@ -6,6 +6,7 @@ import hashPassword from "../helpers/hashPassword.js";
 import violateUniqueConstraint from "../helpers/violateUniqueConstraint.js";
 import notFound from "../helpers/notFound.js";
 import { exit } from "process";
+import { generateAccessToken } from "../helpers/authToken.js";
 
 const userRoutes = Router();
 
@@ -41,7 +42,9 @@ userRoutes.post(
       }
     }
 
-    res.send({ userId });
+    // create a token
+    const token = generateAccessToken(userId);
+    res.send({ userId, token });
   },
 );
 
@@ -71,8 +74,11 @@ userRoutes.post("/login", betterJson, async (req: Request, res: Response) => {
     }
   }
 
-  // should never be undefined
-  res.send({ userId: user?.userId });
+  const userId = user?.userId;
+
+  // create a token
+  const token = generateAccessToken(userId);
+  res.send({ userId: userId, token });
 });
 
 interface userProfileUpdateParams {
