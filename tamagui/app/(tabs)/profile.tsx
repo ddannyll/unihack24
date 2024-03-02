@@ -1,47 +1,99 @@
-import { Text, View, Avatar } from "tamagui"
+import { Text, View, Avatar, Sheet } from "tamagui";
+import { userApiMe } from "../../api/api";
+import { useQuery } from "@tanstack/react-query";
+import { SheetDemo } from "../../components/cookedSheet";
+import { useState } from "react";
 
 export default function Profile() {
-    return (
-        <>
-            <View display="flex" alignItems="center" width="100vw">
-                {/* <Text fontSize="$10" marginBottom="$5">Profile</Text> */}
-                {/* Top Profile Pic Section */}
-                {/* If this looks funky on other devices, edit the padding and try to use centering instead */}
-                <View backgroundColor="red" width="100%" height="$20" display="flex" alignItems="center" paddingTop="$7">
-                    <Avatar circular size="$12">
-                        <Avatar.Image src="http://placekitten.com/200/300" />
-                        <Avatar.Fallback bc="red" />
-                    </Avatar>
-                    <View>
-                        <Text color="white" fontSize="$7" fontWeight="bold" marginTop="$2">Gojo & Ahri</Text>
-                    </View>
-                </View>
+  // react query fetch shit
 
-                {/* Main section */}
-                <View marginTop="$-5" backgroundColor="white" borderRadius="$8" paddingTop="$5" paddingLeft="$2" width="100%" alignItems="center" height="100%">
-                    {/* Details */}
-                    <View flexDirection="column" space="$4" width="$20">
-                        <DetailRow label="Email" value="email@gmail.com" />
-                        <DetailRow label="Date of Birth" value="01/01/1999" />
-                        <DetailRow label="Gender" value="Male" />
-                        <DetailRow label="Phone" value="123-456-7890" />
-                    </View>
-                </View>
-            </View>
-        </>
-    )
+  const {
+    isPending,
+    error,
+    data: userData,
+  } = useQuery({
+    queryKey: ["userProfile"],
+    queryFn: () => userApiMe(),
+  });
+
+  if (!userData || isPending) {
+    return <Text>Loading</Text>;
+  }
+
+  if (error) {
+    return <Text>Error</Text>;
+  }
+
+  console.log(userData);
+
+  return (
+    <>
+      <View display="flex" alignItems="center" width="100vw">
+        {/* <Text fontSize="$10" marginBottom="$5">Profile</Text> */}
+        {/* Top Profile Pic Section */}
+        {/* If this looks funky on other devices, edit the padding and try to use centering instead */}
+        <View
+          backgroundColor="red"
+          width="100%"
+          height="$20"
+          display="flex"
+          alignItems="center"
+          paddingTop="$7"
+        >
+          <Avatar circular size="$12" backgroundColor={"wheat"}>
+            <Avatar.Image
+              src={
+                userData.profilePicture ||
+                "https://pbs.twimg.com/profile_images/1559210586373857280/CTjWPZ4c_400x400.jpg"
+              }
+            />
+            <Avatar.Fallback bc="red" />
+          </Avatar>
+          <View>
+            <Text color="white" fontSize="$7" fontWeight="bold" marginTop="$2">
+              {userData.bio}
+            </Text>
+          </View>
+        </View>
+
+        {/* Main section */}
+        <View
+          marginTop="$-5"
+          backgroundColor="white"
+          borderRadius="$8"
+          paddingTop="$5"
+          paddingLeft="$2"
+          width="100%"
+          alignItems="center"
+          height="100%"
+        >
+          {/* Details */}
+          <View flexDirection="column" space="$4" width="$20">
+            <DetailRow label="Gender" value="Male" />
+          </View>
+        </View>
+      </View>
+    </>
+  );
 }
 
 // Component to render each detail row
 type DetailRowProps = {
-    label: string,
-    value: string
-}
+  label: string;
+  value: string;
+};
 function DetailRow({ label, value }: DetailRowProps) {
-    return (
-      <View flexDirection="row" justifyContent="space-between" alignItems="center" borderBottomColor="black">
-        <Text color="$gray" fontWeight="bold">{label}</Text>
-        <Text>{value}</Text>
-      </View>
-    );
-  }
+  return (
+    <View
+      flexDirection="row"
+      justifyContent="space-between"
+      alignItems="center"
+      borderBottomColor="black"
+    >
+      <Text color="$gray" fontWeight="bold">
+        {label}
+      </Text>
+      <Text>{value}</Text>
+    </View>
+  );
+}

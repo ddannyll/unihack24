@@ -71,8 +71,11 @@ userApi.interceptors.request.use(authenticatedRequest);
 // Functions
 export const userApiMe = async () => {
   const response = await userApi.get<{
-    userId: string;
-    token: string;
+    bio: string;
+    email: string;
+    gender: string;
+    profilePicture: string;
+    searching: false;
   }>("user/me");
   return response.data;
 };
