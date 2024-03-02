@@ -30,10 +30,6 @@ app.get("/", (req: Request, res: Response) => {
 app.use("/user", usersRoutes);
 app.use("/message", authenticateToken, messageRoutes);
 
-firebaseDBRef.child("users").set({
-  user: "Me :)",
-});
-
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
 
