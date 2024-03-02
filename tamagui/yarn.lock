@@ -2600,7 +2600,7 @@
     "@tamagui/stacks" "1.90.15"
     "@tamagui/web" "1.90.15"
 
-"@tamagui/sheet@1.90.15":
+"@tamagui/sheet@^1.90.15", "@tamagui/sheet@1.90.15":
   version "1.90.15"
   dependencies:
     "@tamagui/animate-presence" "1.90.15"
