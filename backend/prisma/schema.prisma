@@ -7,11 +7,11 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./dev.db"
 }
 
 model User {
-  userId         String           @id
+  userId         String           @id @default(uuid())
   email          String           @unique
   hashPassword   String
   bio            String?
@@ -28,42 +28,41 @@ model User {
 }
 
 model Tag {
-  tagId      String @id
+  tagId      String @id @default(uuid())
   name       String @unique
   numberUsed Int    @default(0)
   users      User[]
 }
 
 model Meetup {
-  meetupId String    @id
+  meetupId String    @id @default(uuid())
   users    User[]
   messages Message[]
   name     String
 }
 
 model Message {
-  messageId  String   @id
+  messageId  String   @id @default(uuid())
   message    String
   timeStamp  DateTime
   fromUser   User     @relation(fields: [fromUserId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
   fromUserId String
   meetup     Meetup[]
-  meetupId   String
 }
 
 model MMQueueElement {
-  MMQueueElementId    String     @id
+  MMQueueElementId    String @id @default(uuid()) // For UUID generation
   userId              String
-  user                User       @relation(fields: [userId], references: [userId])
-  activities          Activity[] // Assuming activities are stored as a comma-separated list
-  preferenceGender    String // "male", "female", "both"
+  user                User   @relation(fields: [userId], references: [userId])
+  activities          String
+  preferenceGender    String
   preferenceMaxRadius Float
   preferenceMinPeople Int
 }
 
-model Activity {
-  activityId     String         @id
-  queueElement   MMQueueElement @relation(fields: [queueElementId], references: [MMQueueElementId])
-  queueElementId String
-  activityName   String
-}
+// model Activity {
+//   activityId     String         @id
+//   queueElement   MMQueueElement @relation(fields: [queueElementId], references: [MMQueueElementId])
+//   queueElementId String
+//   activityName   String
+// }

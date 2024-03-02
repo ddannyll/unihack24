@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@tamagui/lucide-icons": "^1.90.15",
+    "react-native-svg": "^15.0.0"
+  }
+}
