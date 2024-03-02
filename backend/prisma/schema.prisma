@@ -24,7 +24,6 @@ model User {
   meetups        Meetup[]
   message        Message[]
   MMQueueElement MMQueueElement[]
-  notificationToken String @default("")
 }
 
 model Tag {
