@@ -87,7 +87,7 @@ messageRoutes.get("/messageList/:userId", async (req, res) => {
   const meetupPreviews = user?.meetups.map((meetup) => {
     return {
       meetupId: meetup.meetupId,
-      meetupName: meetup.name,
+      meetupName: meetup.meetupName,
       meetupMsgPreview: meetup.messages.at(0)?.message ?? "",
       meetupDateLastMsg: meetup.messages.at(0)?.timeStamp ?? Date(),
     };

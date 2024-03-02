@@ -1,11 +1,9 @@
 import { Request, Response, Router } from "express";
-import { prismaClient } from "../clients.ts";
-import { firebaseDBRef } from "../clients.ts"
+import { prismaClient, firebaseDBRef } from "../clients.js";
 import betterJson from "../middleware/betterJson.js";
 import { uuidv4 } from "@firebase/util";
 import { assert, error } from "console";
 // import { randomUUID } from "crypto";
- 
 
 ///routes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes below
 ///routes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes below
@@ -22,62 +20,76 @@ interface MatchmakingSearchSession {
   preferenceMinPeople: number;
 }
 
+mmRoutes.post(
+  "/matchmaking/startsearch",
+  betterJson,
+  async (req: Request, res: Response) => {
+    try {
+      const {
+        userId,
+        activities,
+        preferenceGender,
+        preferenceMaxRadius,
+        preferenceMinPeople,
+      } = req.body;
 
-mmRoutes.post("/matchmaking/startsearch",betterJson,  async (req: Request, res: Response) => {
-  try {
-    const {
-      userId,
-      activities,
-      preferenceGender,
-      preferenceMaxRadius,
-      preferenceMinPeople,
-    } = req.body;
+      await matchmakingStartSearch(
+        userId,
+        activities,
+        preferenceGender,
+        preferenceMaxRadius,
+        preferenceMinPeople,
+      );
 
-    await matchmakingStartSearch(userId, activities, preferenceGender, preferenceMaxRadius, preferenceMinPeople);
+      res.status(200).json({});
+    } catch (error) {
+      console.error("Error starting matchmaking search:", error);
+      res
+        .status(500)
+        .json({ error: "/matchmaking/startsearchInternal server error" });
+    }
+  },
+);
 
-  
-     res.status(200).json({  });
-  } catch (error) {
-    console.error("Error starting matchmaking search:", error);
-    res.status(500).json({ error: "/matchmaking/startsearchInternal server error" });
-  }
-});
+mmRoutes.post(
+  "/matchmaking/stopsearch",
+  betterJson,
+  async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.body;
 
-mmRoutes.post("/matchmaking/stopsearch", betterJson, async (req: Request, res: Response) => {
-  try {
-    const { userId } = req.body;
+      await matchmakingStopsearch(userId);
 
-    
-    await matchmakingStopsearch(userId)
+      res.status(200).json({});
+    } catch (error) {
+      console.error("Error stopping matchmaking search:", error);
+      res
+        .status(500)
+        .json({ error: "/matchmaking/stopsearch Internal server error" });
+    }
+  },
+);
 
-    
-    res.status(200).json({});
-  } catch (error) {
-    console.error("Error stopping matchmaking search:", error);
-    res.status(500).json({ error: "/matchmaking/stopsearch Internal server error" });
-  }
-});
+mmRoutes.post(
+  "/matchmaking/choice",
+  betterJson,
+  async (req: Request, res: Response) => {
+    try {
+      const meetupId: string = req.body.meetupId;
+      const userId: string = req.body.userId;
+      const choice: string = req.body.choice;
 
+      await meetupAcceptDecline(meetupId, userId, choice);
 
-
-
-
-mmRoutes.post("/matchmaking/choice", betterJson, async (req: Request, res: Response) => {
-  try {
-    const meetupId: string = req.body.meetupId;
-    const userId: string = req.body.userId;
-    const choice: string = req.body.choice
-    
-    await meetupAcceptDecline(meetupId, userId, choice)
-
-    
-    res.status(200).json({});
-  } catch (error) {
-    console.error("Error making choice", error);
-    res.status(500).json({ error: "/matchmaking/choice Internal server error" });
-  }
-});
- 
+      res.status(200).json({});
+    } catch (error) {
+      console.error("Error making choice", error);
+      res
+        .status(500)
+        .json({ error: "/matchmaking/choice Internal server error" });
+    }
+  },
+);
 
 ////functions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions below
 ////functions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions below
@@ -85,7 +97,7 @@ mmRoutes.post("/matchmaking/choice", betterJson, async (req: Request, res: Respo
 ////functions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions below
 ////functions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions below
 ////functions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions below
-async function getDesiredActivities() { 
+async function getDesiredActivities() {
   let activities: { [key: string]: string[] } = {};
 
   let allRecords = await prismaClient.mMQueueElement.findMany();
@@ -438,23 +450,28 @@ async function pushMatches(groups: Map<string, string[][]>) {
       for (let user of group) {
         let meetupId = uuidv4();
         // pushNotification(meetupId, activity,  group);
-        
 
         //"pending", "accepted", "declined"
         const newMeetupData = {
-          meetupId:meetupId,
-          activity: activity, 
+          meetupId: meetupId,
+          activity: activity,
           users: group,
-          accepted: group.map(() => "pending"), 
-          status: "pending"
+          accepted: group.map(() => "pending"),
+          status: "pending",
         };
 
-        firebaseDBRef.child("meetups").push(newMeetupData).then(() => {
-          console.log("New meetup has been successfully created with id:", meetupId);
-        })
-        .catch((error) => {
-          console.error("Error creating new meetup:", error);
-        });
+        firebaseDBRef
+          .child("meetups")
+          .push(newMeetupData)
+          .then(() => {
+            console.log(
+              "New meetup has been successfully created with id:",
+              meetupId,
+            );
+          })
+          .catch((error) => {
+            console.error("Error creating new meetup:", error);
+          });
 
         alreadyMatched.add(user);
         await prismaClient.mMQueueElement.deleteMany({
@@ -462,8 +479,6 @@ async function pushMatches(groups: Map<string, string[][]>) {
             userId: user,
           },
         });
-
-
       }
     }
   }
@@ -478,8 +493,7 @@ async function matchmakingLoop() {
   }
 }
 
-
-//Adds a user & their preferences to the matchmaking queue 
+//Adds a user & their preferences to the matchmaking queue
 async function matchmakingStartSearch(
   userId: string,
   activities: string[],
@@ -493,7 +507,7 @@ async function matchmakingStartSearch(
   let activitiesString = activities.join(",");
 
   // Add to the MMQueue
-    await prismaClient.mMQueueElement.create({
+  await prismaClient.mMQueueElement.create({
     data: {
       userId: userId,
       activities: activitiesString,
@@ -503,9 +517,8 @@ async function matchmakingStartSearch(
     },
   });
 
-
   //return
- }
+}
 
 //Cancel's a user's search for matchmaking.
 async function matchmakingStopsearch(userId: string) {
@@ -516,37 +529,42 @@ async function matchmakingStopsearch(userId: string) {
   });
 }
 
-
-async function meetupAcceptDecline(meetupId:string, userId:string, choice: string) {
- 
-  if(choice != "accept" && choice != "decline"){
-    throw new Error(`Expected choice to be "accept" or "decline" but received ${choice}`)
+async function meetupAcceptDecline(
+  meetupId: string,
+  userId: string,
+  choice: string,
+) {
+  if (choice != "accept" && choice != "decline") {
+    throw new Error(
+      `Expected choice to be "accept" or "decline" but received ${choice}`,
+    );
   }
-
-
 
   //find the meetup
   const meetupRef = firebaseDBRef.child("meetups").child(meetupId);
-    
-    const snapshot = await meetupRef.once("value");
-    const meetupData = snapshot.val();
-    
-     if (!meetupData) {
-      throw new Error("Meetup not found");
-    }
-    
-     const userIndex = meetupData.users.indexOf(userId);
-    if (userIndex === -1) {
-      throw new Error("User not found in meetup");
-    }
-    
-     meetupData.accepted[userIndex] = choice; // "accept" or "decline"
-    
-     await meetupRef.update({ accepted: meetupData.accepted });
-    
- }
 
- 
+  const snapshot = await meetupRef.once("value");
+  const meetupData = snapshot.val();
 
+  if (!meetupData) {
+    throw new Error("Meetup not found");
+  }
 
-export { calculateDistance,multiMatchmake, matchmakingLoop, matchmakingStartSearch, matchmakingStopsearch, pairMatchmake};
+  const userIndex = meetupData.users.indexOf(userId);
+  if (userIndex === -1) {
+    throw new Error("User not found in meetup");
+  }
+
+  meetupData.accepted[userIndex] = choice; // "accept" or "decline"
+
+  await meetupRef.update({ accepted: meetupData.accepted });
+}
+
+export {
+  calculateDistance,
+  multiMatchmake,
+  matchmakingLoop,
+  matchmakingStartSearch,
+  matchmakingStopsearch,
+  pairMatchmake,
+};
