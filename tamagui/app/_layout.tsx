@@ -23,6 +23,7 @@ import * as BackgroundFetch from "expo-background-fetch";
 import * as TaskManager from "expo-task-manager";
 
 import Location from "expo-location";
+import { userApiLocation } from "../api/api";
 import {
   BACKGROUND_LOCATION_TRACKER,
   LOCATION_UPDATE,

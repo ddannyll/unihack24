@@ -78,17 +78,8 @@ export default function MainSearchToggleScreen() {
       if (locationData.newRouteCoordinates[0]) {
         setLocation({
           location: {
-            coords: {
-              latitude: locationData.newRouteCoordinates[0].latitude,
-              longitude: locationData.newRouteCoordinates[0].longitude,
-              accuracy: 0,
-              altitude: 0,
-              altitudeAccuracy: 0,
-              heading: 0,
-              speed: 0,
-            },
-            timestamp: new Date().getTime(),
-            mocked: false,
+            latitude: locationData.newRouteCoordinates[0].latitude,
+            longitude: locationData.newRouteCoordinates[0].longitude,
           },
           updatedAt: new Date(),
         });
