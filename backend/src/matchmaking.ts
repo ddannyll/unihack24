@@ -1,5 +1,6 @@
 import { group } from "console";
 import { prismaClient } from "./prisma.js";
+import { stringify } from "querystring";
 
 async function getDesiredActivities() { 
   let activities: { [key: string]: string[] } = {};
@@ -95,7 +96,25 @@ function calculateDistance(
   return distance * 1000;
 }
 
-async function checkCompatibility(userId1: string, userId2: string) {
+async function checkCompatibility(userId1: string, userId2: string, existingPairings:string[][]) {
+  //check if userId1 == userId2
+    //or if the pair already exists. 
+    if(userId1 == userId2){
+    return false;
+  }
+  if(existingPairings!=undefined){
+    for(let pairing of existingPairings){
+      if(pairing[0] == userId1 && pairing[1] == userId2){
+        return false;
+      }else if (pairing[0] == userId2 && pairing[1] == userId1){
+        return false;
+      }
+    }
+  }
+  
+  
+
+  
   let userRecord1 = await prismaClient.user.findFirst({
     where: {
       userId: userId1,
@@ -130,6 +149,9 @@ async function checkCompatibility(userId1: string, userId2: string) {
     return false;
   }
 
+ 
+
+
   if (userSearch1["preferenceGender"] != "both" || userSearch2["preferenceGender"] != "both") {
     if (userRecord1["gender"] != userSearch2["preferenceGender"]) {
       console.log("userRecord1[gender] =/= userSearch2[preferenceGender]")
@@ -154,7 +176,7 @@ async function checkCompatibility(userId1: string, userId2: string) {
     userSearch2["preferenceMaxRadius"],
   )
 
-  console.log(`Distance between ${userId1}, ${userId2} = ${dist}`)
+  // console.log(`Distance between ${userId1}, ${userId2} = ${dist}`)
   if (dist >maxViableDist 
   ) {
     
@@ -163,9 +185,8 @@ async function checkCompatibility(userId1: string, userId2: string) {
 
   return true;
 }
-
-async function curateFeed() {}
-
+ 
+ 
 
 //this should work.
 async function pairMatchmake() {
@@ -186,14 +207,15 @@ async function pairMatchmake() {
     let currActivity = sortedActivities[i]; 
     let userIds: string[] = currActivity[1];
 
-    for (let i = 0; i < userIds.length; i++) {
+     for (let i = 0; i < userIds.length; i++) {
       for (let j = i + 1; j < userIds.length; j++) {
-        if ((await checkCompatibility(userIds[i], userIds[j])) == true) {
+        if ((await checkCompatibility(userIds[i], userIds[j], validPairings[currActivity[0]])) == true) {
           if (currActivity[0] in validPairings) {
             validPairings[currActivity[0]].push([userIds[i], userIds[j]]);
           } else {
             validPairings[currActivity[0]] = [[userIds[i], userIds[j]]];
           }
+
         } 
       }
     }
@@ -203,41 +225,74 @@ async function pairMatchmake() {
   //looks like
   //{'basketball': [["123", "533"], ["4141", "333"]]}...
 }
+ 
 
+function newVertexConnectedness(graph: Map<any, Set<any>>, group: string[], newVertex: string) {
+  let numEdges = 0;
+  let edgesFromNewvertex = graph.get(newVertex);
+  
+  if (edgesFromNewvertex === undefined) {
+    return 0;
+  } 
+ 
+  for (let e of edgesFromNewvertex) {
+    if (group.includes(e)) {
+      numEdges++;
+    }
+  } 
+  return numEdges / group.length; 
+}
 
 //SCCC but instead of strongly connceted its some x % connected.
-function findSCCC(graph: Map<any, Set<any>>): Set<Set<any>> {
-  let components: Set<Set<any>> = new Set();
+  //no idea whta to name this function
+function findXCCC(graph: Map<any, Set<any>>): string[][] {
+   let potentialGroupings:string[][] = []
 
   graph.forEach((_: any, vertex: any) => {
-    // Skip if vertex is already part of a component
-    if (Array.from(components).some(component => component.has(vertex))) return;
-
-    let visited: Set<any> = new Set();
-    let stack: any[] = [vertex];
-
-    //DFS: Find connected vertices
-    while (stack.length > 0) {
-      let currentVertex: any = stack.pop();
-      if (!visited.has(currentVertex)) {
-        visited.add(currentVertex);
-        let neighbors: Set<any> = graph.get(currentVertex) || new Set();
-        neighbors.forEach(neighbor => {
-          if (!visited.has(neighbor)) {
-            stack.push(neighbor);
-          }
-        });
+    for(let i = 0; i<potentialGroupings.length; i++){
+      if(newVertexConnectedness(graph, potentialGroupings[i], vertex) > 0.7){
+        potentialGroupings[i].push(vertex)
       }
-    }
-    
-    //Should be at least 70% ?? connected
-    //ion even know if this works lmfao
-    if (visited.size >= graph.size * 0.7) {
-      components.add(visited);
-    }
+    } 
+    potentialGroupings.push([vertex])
+
   });
 
-  return components;
+  //sorted descending by length.  
+  potentialGroupings.sort((a, b) => b.length - a.length);
+
+  //now that we have them sorted, we can trim them into final groups so there are no duplicates
+  //take the biggest ones.
+
+
+  let used : Set<string>= new Set();
+
+  let finalGroupings: string[][] =  []
+
+  for(let group of potentialGroupings){
+    if(group.length == 1){
+      break;
+    }
+
+    let duplicatesExist = false;
+    for(let user of group){
+      if(used.has(user)){
+        duplicatesExist = true;
+        break;
+      }
+    }
+
+    if(!duplicatesExist){
+      finalGroupings.push(group);
+      for(let user of group){
+        used.add(user);
+      }
+    }
+  
+  }
+
+
+  return finalGroupings;
 }
 
   
@@ -247,7 +302,7 @@ async function multiMatchmake() {
   console.log(pairings)
   console.log("      ")
 
-  let groups:Map<string, Set<Set<string>>> = new Map(); 
+  let groups:Map<string, string[][]> = new Map(); 
   /*
 Set(1) { Set(1) { 'user6' } }
 Set(1) { Set(2) { 'user1', 'user4' } }
@@ -280,9 +335,9 @@ Set(1) { Set(3) { 'user2', 'user4', 'user3' } }
         graph.get(pair[1]).add(pair[0]);
       }
     }
- 
-    let components = findSCCC(graph);
-    groups.set(currentActivity, components)
+    
+    let components = findXCCC(graph);
+     groups.set(currentActivity, components)
   }
 
 
