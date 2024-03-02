@@ -75,3 +75,22 @@ export const userApiMe = async () => {
   }>("user/me");
   return response.data;
 };
+
+export const userApiLocation = async ({
+  latitude,
+  longitude,
+}: {
+  latitude: number;
+  longitude: number;
+}) => {
+  const response = await userApi.put<{
+    userId: string;
+    token: string;
+  }>("user/location", {
+    latitude,
+    longitude,
+  });
+  return response.data;
+};
+
+// 
