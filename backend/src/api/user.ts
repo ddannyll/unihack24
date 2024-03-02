@@ -88,7 +88,7 @@ userRoutes.put("/", betterJson, async (req: Request, res: Response) => {
   const info: userProfileUpdateParams = req.body;
   let prev_details;
   try {
-    prev_details = await prismaClient.user.findFirst({
+    prev_details = await prismaClient.user.findFirstOrThrow({
       where: {
         userId: info.userId,
       },
@@ -126,7 +126,7 @@ userRoutes.get("/:userId", async (req: Request, res: Response) => {
 
   let user;
   try {
-    user = await prismaClient.user.findFirst({
+    user = await prismaClient.user.findFirstOrThrow({
       where: {
         userId,
       },
@@ -156,6 +156,30 @@ interface userLocationParams {
   latitude: number;
 }
 
-userRoutes.put("/location", betterJson, (req: Request, res: Response) => {});
+userRoutes.put("/location", betterJson, async (req: Request, res: Response) => {
+  const info: userLocationParams = req.body;
+
+  try {
+    await prismaClient.user.update({
+      where: {
+        userId: info.userId,
+      },
+      data: {
+        longitude: info.longitude,
+        latitude: info.latitude,
+      },
+    });
+  } catch (e) {
+    if (notFound(e as object)) {
+      res.status(400).send({ error: "user does not exist with given id" });
+      return;
+    } else {
+      console.error(e);
+      exit(1);
+    }
+  }
+
+  res.send({});
+});
 
 export default userRoutes;

@@ -11,7 +11,7 @@ datasource db {
 }
 
 model User {
-  userId         String           @id
+  userId         String           @id @default(uuid())
   email          String           @unique
   hashPassword   String
   bio            String?
@@ -24,24 +24,25 @@ model User {
   meetups        Meetup[]
   message        Message[]
   MMQueueElement MMQueueElement[]
+  notificationToken String @default("")
 }
 
 model Tag {
-  tagId      String @id
+  tagId      String @id @default(uuid())
   name       String @unique
   numberUsed Int    @default(0)
   users      User[]
 }
 
 model Meetup {
-  meetupId String    @id
+  meetupId String    @id @default(uuid())
   users    User[]
   messages Message[]
   name     String
 }
 
 model Message {
-  messageId  String   @id
+  messageId  String   @id @default(uuid())
   message    String
   timeStamp  DateTime
   fromUser   User     @relation(fields: [fromUserId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
@@ -50,14 +51,15 @@ model Message {
 }
 
 model MMQueueElement {
-  MMQueueElementId    String   @id @default(uuid()) // For UUID generation
-  userId              String   
-  user                User     @relation(fields: [userId], references: [userId])
+  MMQueueElementId    String @id @default(uuid()) // For UUID generation
+  userId              String
+  user                User   @relation(fields: [userId], references: [userId])
   activities          String
   preferenceGender    String
   preferenceMaxRadius Float
-  preferenceMinPeople Int 
+  preferenceMinPeople Int
 }
+
 // model Activity {
 //   activityId     String         @id
 //   queueElement   MMQueueElement @relation(fields: [queueElementId], references: [MMQueueElementId])
