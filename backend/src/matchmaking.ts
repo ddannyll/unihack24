@@ -66,11 +66,7 @@ async function checkCompatibility(userId1: string, userId2: string, existingPair
         return false;
       }
     }
-  }
-  
-  
-
-  
+  } 
   let userRecord1 = await prismaClient.user.findFirst({
     where: {
       userId: userId1,
@@ -110,12 +106,12 @@ async function checkCompatibility(userId1: string, userId2: string, existingPair
 
   if (userSearch1["preferenceGender"] != "both" || userSearch2["preferenceGender"] != "both") {
     if (userRecord1["gender"] != userSearch2["preferenceGender"]) {
-      console.log("userRecord1[gender] =/= userSearch2[preferenceGender]")
+      // console.log("userRecord1[gender] =/= userSearch2[preferenceGender]")
       return false;
     }
 
     if (userRecord2["gender"] != userSearch1["preferenceGender"]) {
-      console.log("userRecord2[gender] =/= userSearch1[preferenceGender]")
+      // console.log("userRecord2[gender] =/= userSearch1[preferenceGender]")
       return false;
     }
   } 
@@ -141,7 +137,8 @@ async function checkCompatibility(userId1: string, userId2: string, existingPair
 
   return true;
 }
- 
+
+
   
 //this should work.
 async function pairMatchmake() {
@@ -170,7 +167,6 @@ async function pairMatchmake() {
           } else {
             validPairings[currActivity[0]] = [[userIds[i], userIds[j]]];
           }
-
         } 
       }
     }
@@ -249,12 +245,12 @@ function findXCCC(graph: Map<any, Set<any>>): string[][] {
 
   return finalGroupings;
 }
+ 
 
 //this works
 async function multiMatchmake() {
   let pairings = await pairMatchmake();
-  console.log(pairings)
-  console.log("      ")
+  
 
   let groups:Map<string, string[][]> = new Map(); 
   /*
@@ -304,11 +300,79 @@ Set(1) { Set(3) { 'user2', 'user4', 'user3' } }
 }
 
 */
-  return groups
+  //this group may still contain duplicates
+  // console.log(groups)
+  await pushMatches(groups);
+  return groups 
+}
 
+async function pushMatches(groups: Map<string, string[][]>) {
+  let userGroupsArray: [string[], string][] = [];
 
+  for (let key of groups.keys()) {
+    for (let group of groups.get(key)!) {
+      userGroupsArray.push([group, key]);
+    }
+  }
 
+  userGroupsArray.sort((a, b) => b[0].length - a[0].length);
 
+  let alreadyMatched = new Set();
+
+  // Iterate  
+  for (let [group, activity] of userGroupsArray) {
+    let allAvailable = true;
+
+    let sumMinPeople = 0;//used to clcaulte the vareage min ppl req
+
+    for (let user of group) {
+      if (alreadyMatched.has(user)) {
+        allAvailable = false;
+        break;
+      }
+      let mmRequest = await prismaClient.mMQueueElement.findFirst({
+        where:{
+          userId: user
+        }
+      })
+      
+      if(mmRequest == null){
+        console.error("MM request shouldnt be null")
+      }else{
+        sumMinPeople = sumMinPeople + mmRequest['preferenceMinPeople']
+
+      }
+    }
+
+    let avgMinPeople = sumMinPeople/group.length
+    //average of the 'preferenceMinPeople' field 
+
+    //only if they havent already bee nmatched/
+    //if they decline this match, then this gets added to a database: this won't be suggested to them
+    //again. but add this functionality later.
+    if (allAvailable && group.length > avgMinPeople) {
+      console.log(`MATCHED: ${group} for ${activity}`)
+      for (let user of group) {
+        // pushNotification(activity, group);
+        alreadyMatched.add(user);
+
+        await prismaClient.mMQueueElement.deleteMany({
+          where: {
+            userId: user,
+          },
+        });
+      }
+    }
+  }
+
+  // Now, userGroupsArray contains the desired array of user-group pairs
+  // console.log(userGroupsArray);
+}
+
+async function matchmakingLoop(){
+  while(true){
+    await multiMatchmake(); 
+  }
 }
 
 //Adds a user & their preferences to the matchmaking queue 
@@ -338,8 +402,6 @@ async function matchmakingStartSearch(
   return result; // Return the result which includes the added matchmaking preferences
 }
 
- 
-
 //Cancel's a user's search for matchmaking.
 async function matchmakingStopsearch(userId: string) {
   await prismaClient.mMQueueElement.deleteMany({
@@ -349,4 +411,4 @@ async function matchmakingStopsearch(userId: string) {
   });
 }
 
-export { calculateDistance,multiMatchmake, matchmakingStartSearch, matchmakingStopsearch, pairMatchmake};
+export { calculateDistance,multiMatchmake, matchmakingLoop, matchmakingStartSearch, matchmakingStopsearch, pairMatchmake};
