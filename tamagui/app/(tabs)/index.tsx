@@ -12,7 +12,7 @@ import {
 } from "../../tasks";
 
 export default function MainSearchToggleScreen() {
-  const loginMutation = useMutation({
+  const locationMutation = useMutation({
     mutationFn: ({
       latitude,
       longitude,
@@ -75,6 +75,15 @@ export default function MainSearchToggleScreen() {
         "locationEmitter locationUpdate fired! locationData: ",
         locationData
       );
+      if (locationData.newRouteCoordinates[0]) {
+        setLocation({
+          location: {
+            latitude: locationData.newRouteCoordinates[0].latitude,
+            longitude: locationData.newRouteCoordinates[0].longitude,
+          },
+          updatedAt: new Date(),
+        });
+      }
     });
   };
 
@@ -87,7 +96,7 @@ export default function MainSearchToggleScreen() {
   // everytime the location changes, we want to update the backend
   useEffect(() => {
     if (location && permission === Location.PermissionStatus.GRANTED) {
-      loginMutation.mutate({
+      locationMutation.mutate({
         latitude: location.location.coords.latitude,
         longitude: location.location.coords.longitude,
       });
