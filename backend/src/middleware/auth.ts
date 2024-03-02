@@ -7,13 +7,18 @@ function authenticateToken(req: Request, res: Response, next: NextFunction) {
 
   if (token == null) return res.sendStatus(401);
 
-  jwt.verify(token, process.env.TOKEN_SECRET as string, (err, userId) => {
+  jwt.verify(token, process.env.TOKEN_SECRET as string, (err, user) => {
     console.log(err);
     if (err) return res.sendStatus(403);
 
     //   Use req.user to access the user object in the route
     //   request is extended with this field in myRequest
-    req.userId = userId as string;
+    const userData = JSON.parse(JSON.stringify(user));
+
+    if (!user) {
+      return res.sendStatus(403);
+    }
+    req.userId = userData?.userId;
     next();
   });
 }

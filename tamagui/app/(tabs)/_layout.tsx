@@ -2,8 +2,17 @@ import { Link, Tabs } from "expo-router";
 import { Pressable } from "react-native";
 import { Text, Button, View } from "tamagui";
 import { AntDesign } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
+import { userApiMe } from "../../api/api";
 
 export default function TabLayout() {
+  // fetch the user
+
+  const { isPending, error, data } = useQuery({
+    queryKey: ["userProfile"],
+    queryFn: () => userApiMe(),
+  });
+
   return (
     <Tabs
       screenOptions={{

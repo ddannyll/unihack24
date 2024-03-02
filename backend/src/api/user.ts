@@ -7,6 +7,7 @@ import violateUniqueConstraint from "../helpers/violateUniqueConstraint.js";
 import notFound from "../helpers/notFound.js";
 import { exit } from "process";
 import { generateAccessToken } from "../helpers/authToken.js";
+import authenticateToken from "../middleware/auth.js";
 
 const userRoutes = Router();
 
@@ -126,6 +127,41 @@ userRoutes.put("/", betterJson, async (req: Request, res: Response) => {
 
   res.send({});
 });
+
+userRoutes.get(
+  "/me",
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    const userId = req.userId;
+
+    let user;
+    try {
+      user = await prismaClient.user.findFirstOrThrow({
+        where: {
+          userId,
+        },
+      });
+    } catch (e) {
+      if (notFound(e as object)) {
+        res
+          .status(400)
+          .send({ error: "user does not exist with given userId" });
+        return;
+      } else {
+        console.error(e);
+        return;
+      }
+    }
+
+    res.send({
+      email: user?.email,
+      bio: user?.bio ?? "",
+      profilePicture: user?.profilePicture ?? "",
+      searching: user?.searching,
+      gender: user?.gender,
+    });
+  },
+);
 
 userRoutes.get("/:userId", async (req: Request, res: Response) => {
   const userId = req.params.userId;

@@ -2,7 +2,7 @@ import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Button, Form, Input, Text, View } from "tamagui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { userApiLogin } from "../../api/api";
+import { authApiLogin } from "../../api/api";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -17,7 +17,7 @@ export default function Login() {
 
   const loginMutation = useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) => {
-      return userApiLogin({
+      return authApiLogin({
         email,
         password,
       });
