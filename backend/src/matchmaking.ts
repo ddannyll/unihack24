@@ -20,51 +20,7 @@ async function getDesiredActivities() {
   
   return activities;
 }
-
-function removeAtIndex(array: any, i: number) {
-  // Check if index is within the bounds of the array
-  if (i >= 0 && i < array.length) {
-    array.splice(i, 1);
-  } else {
-    console.error("Index out of bounds");
-  }
-  return array;
-}
-
-type Requirement = {
-  id: string;
-  min: number;
-};
-
-function createOptimalGroups(people: Requirement[]) {
-  // Sort people by their minimum requirement in ascending order
-  people.sort((a, b) => a.min - b.min);
-
-  console.log(people);
-  console.log("\n\n");
-
-  const groups = [];
-  let currentGroup = [];
-  let currentMin = 0;
-
-  //if index is i, we can have i+1 people,[1,1,1,1,1,1]
-  for (let i = people.length - 1; i >= 0; ) {
-    if (people[i].min > i + 1) {
-      //then this person cannot be fit into a group.
-      console.log(`cant put ${JSON.stringify(people[i])}`);
-      i--;
-      continue;
-    } else {
-      //take people[i].min people.
-      groups.push(people.slice(i - people[i].min + 1, i + 1));
-      // console.log(people.slice(i-people[i].min+1,i+1))
-      i = i - people[i].min;
-    }
-  }
-
-  return groups.map((group) => group.map((x) => x.id));
-}
-
+  
 function calculateDistance(
   lat1: number,
   lon1: number,
@@ -186,8 +142,7 @@ async function checkCompatibility(userId1: string, userId2: string, existingPair
   return true;
 }
  
- 
-
+  
 //this should work.
 async function pairMatchmake() {
   //these are valid pairings
@@ -295,8 +250,7 @@ function findXCCC(graph: Map<any, Set<any>>): string[][] {
   return finalGroupings;
 }
 
-  
-//this doens't work this is half made
+//this works
 async function multiMatchmake() {
   let pairings = await pairMatchmake();
   console.log(pairings)
