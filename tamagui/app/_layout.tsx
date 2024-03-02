@@ -23,7 +23,6 @@ import * as BackgroundFetch from "expo-background-fetch";
 import * as TaskManager from "expo-task-manager";
 
 import Location from "expo-location";
-import { userApiLocation } from "../api/api";
 import {
   BACKGROUND_LOCATION_TRACKER,
   LOCATION_UPDATE,
@@ -171,7 +170,10 @@ function RootLayoutNav() {
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
           <Stack>
-            <Stack.Screen name="(auth)/register" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="(auth)/register"
+              options={{ headerShown: false }}
+            />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="modal" options={{ presentation: "modal" }} />
           </Stack>
