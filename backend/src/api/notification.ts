@@ -2,6 +2,7 @@ import { Request, Response, Router } from "express";
 import betterJson from "../middleware/betterJson.js";
 import { prismaClient } from "../clients.js";
 import notFound from "../helpers/notFound.js";
+import { exit } from "process";
 
 const notificationRoutes = Router();
 notificationRoutes.put("/", betterJson, async (req: Request, res: Response) => {
@@ -21,7 +22,7 @@ notificationRoutes.put("/", betterJson, async (req: Request, res: Response) => {
       return;
     } else {
       console.error(e);
-      return;
+      exit(1);
     }
   }
   res.send({});
