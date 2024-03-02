@@ -8,7 +8,13 @@ import messageRoutes from "./api/message.js";
 
 dotenv.config();
 
+import cors from "cors";
+import authenticateToken from "./middleware/auth.js";
+
 const app: Express = express();
+
+app.use(cors());
+
 const port = process.env.PORT || 3000;
 
 // routes
@@ -16,7 +22,7 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Hello World!");
 });
 app.use("/user", usersRoutes);
-app.use("/message", messageRoutes);
+app.use("/message", authenticateToken, messageRoutes);
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);

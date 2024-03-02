@@ -17,7 +17,7 @@ export default function TabLayout() {
           title: 'Home',
           tabBarIcon: ({ color }) =>  <AntDesign name="home" size={20} color="black" />,
           headerRight: () => (
-            <Link href="/profile" asChild>
+            <Link href="/login" asChild>
               <Pressable>
                 <Text>Hello!</Text>
               </Pressable>
