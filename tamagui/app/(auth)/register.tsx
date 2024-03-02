@@ -1,7 +1,10 @@
 import { Link, useRouter } from "expo-router"
 import { useState } from "react"
-import { Button, Form, Input, Label, RadioGroup, Text, View, styled } from "tamagui"
+import { Button, Form, Input, Label, RadioGroup, Text, View, styled, Spinner } from "tamagui"
 import { useMutation } from '@tanstack/react-query';
+import DateTimePicker from 'react-native-ui-datepicker';
+import dayjs from 'dayjs';
+import { KeyboardAvoidingView } from "react-native";
 
 type RegisterUserType = {
     email: string;
@@ -38,17 +41,33 @@ const registerUser = async ({ email, password, gender }: RegisterUserType) => {
     }
 }
 
+function formatDate(date: any) {
+    return date.format("MM/DD/YYYY")
+}
+
 export default function Register() {    
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [gender, setGender] = useState<"male" | "female" | "">('')
+    const [showDatePicker, setShowDatePicker] = useState(false)
+    const [date, setDate] = useState(dayjs())
+
+    const [isLoading, setIsLoading] = useState(false)
 
     const router = useRouter();
 
 
     const handleSubmit = async () => {
         const res = await registerUser({ email, password, gender });
-        router.push('/(tabs)')
+
+        setIsLoading(true)
+        setTimeout(() => {
+            console.log('waiting...')
+            setIsLoading(false)
+            router.push('/(tabs)')
+        }, 1000)
+
+        // router.push('/(tabs)')
     }
 
     return (
@@ -62,7 +81,7 @@ export default function Register() {
                     <Text fontSize="$9">REGISTER</Text>
 
                     <Input 
-                        id="email-input" 
+                        id="register-email-input" 
                         keyboardType="email-address" 
                         placeholder="Email address" 
                         width="$20"
@@ -70,19 +89,39 @@ export default function Register() {
                         onChangeText={setEmail}
                     />
                     <Input 
-                        id="password-input" 
+                        id="register-password-input" 
                         placeholder="Password" 
                         width="$20"
                         value={password}
                         onChangeText={setPassword}
                     />
 
-                    <RadioGroup>
+                    {/* No clue if this onselectiochagnehsoudlsetreponder thing works or not */}
+                    <RadioGroup onSelectionChangeShouldSetResponder={setGender}>
                         <View display="flex" flexDirection="row" gap="$5" justifyContent="space-between" width="$20" padding="$2">
                             <GenderRadioBtn gender="Male"/>
                             <GenderRadioBtn gender="Female"/>
                         </View>
                     </RadioGroup>
+
+                    {/* <Button onPress={() => setShowDatePicker(!showDatePicker)}>
+                        <Text>{!showDatePicker ? formatDate(date) : "Close"}</Text>
+                    </Button> */}
+                    {/* {showDatePicker &&
+                    <KeyboardAvoidingView>
+                        <View backgroundColor="white" zIndex={999}>
+                            <DateTimePicker
+                                mode="single"
+                                // date={formatDate(date)}
+                                onChange={(params) => {
+                                    setDate(params.date)
+                                    console.log(date)
+                                }}
+                                date={formatDate(date)}
+                            />
+                        </View>
+                    </KeyboardAvoidingView>
+                    } */}
 
                     <Button 
                         backgroundColor="#0070f0" 
@@ -91,10 +130,14 @@ export default function Register() {
                         width="$20" 
                         onPress={handleSubmit}
                     >
-                        Continue
+                        {isLoading ? <Spinner size="small"></Spinner> : "Continue"}
                     </Button>
 
-                    {/* <View display="flex" justifyContent="flex-end" flexDirection="row">
+                    <Link href="/(auth)/login">
+                        <Text>Sign in Instead</Text>
+                    </Link>
+
+                    {/* <View>
                         <View flex={4}></View>
                         <View flex={1}>
                             <Link href="/(auth)/login">
@@ -128,3 +171,5 @@ function GenderRadioBtn({ gender }: GenderRadioBtnProps) {
         </View>
     )
 }
+
+

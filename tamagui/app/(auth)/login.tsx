@@ -87,8 +87,8 @@ export default function Login() {
                     </Button>
 
                     <View display="flex" justifyContent="center">
-                        <Link href="/(auth)/forgotPassword">
-                            <Text>Forgot Password?</Text>
+                        <Link href="/(auth)/register">
+                            <Text>Register Instead</Text>
                         </Link>
                     </View>
 
