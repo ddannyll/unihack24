@@ -14,13 +14,15 @@ const loginUser = async ({ email, password }: LoginCredentials) => {
         // 'http://localhost:3000/user/login' if you're in development.
         // can do this using env file
         return { userId: "3"}
-        const response = await fetch('user/login', {
+        const response = await fetch('http://localhost:3000/user/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ email, password }),
         });
+
+        console.log(response)
 
         if (!response.ok) {
             // If the server response is not ok, throw an error with the response status
