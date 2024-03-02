@@ -192,7 +192,7 @@ userRoutes.get(
         return;
       } else {
         console.error(e);
-        return;
+        exit(1);
       }
     }
 
@@ -222,7 +222,7 @@ userRoutes.get("/:userId", async (req: Request, res: Response) => {
       return;
     } else {
       console.error(e);
-      return;
+      exit(1);
     }
   }
 
