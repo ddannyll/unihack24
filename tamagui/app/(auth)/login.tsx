@@ -86,6 +86,13 @@ export default function Login() {
             Continue
           </Button>
 
+          {/* show error */}
+          {loginMutation.error && (
+            <>
+              <Text color={"red"}>Something is wrong </Text>
+            </>
+          )}
+
           <View display="flex" justifyContent="center">
             <Link href="/(auth)/forgotPassword">
               <Text>Forgot Password?</Text>
