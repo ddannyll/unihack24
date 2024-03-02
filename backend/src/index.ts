@@ -1,5 +1,6 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
+import { prismaClient, firebaseDBRef } from "./clients.js";
 import usersRoutes from "./api/user.js";
 import notificationRoutes from "./api/notification.js";
 // import startMatchMaking from "./matchmaking.js";
@@ -26,10 +27,10 @@ const port = process.env.PORT || 3000;
 
 // routes
 app.get("/", (req: Request, res: Response) => {
-  res.send('Hello');
+  res.send("Hello");
 });
 app.use("/user", usersRoutes);
-app.use("/notification", notificationRoutes)
+app.use("/notification", notificationRoutes);
 app.use("/message", authenticateToken, messageRoutes);
 
 app.listen(port, () => {
