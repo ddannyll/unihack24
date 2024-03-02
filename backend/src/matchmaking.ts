@@ -1,9 +1,10 @@
 import { prismaClient } from "./prisma.js";
 
-async function getDesiredActivities() {
+async function getDesiredActivities() { 
   let activities: { [key: string]: string[] } = {};
 
   let allRecords = await prismaClient.mMQueueElement.findMany();
+   
 
   for (let record of allRecords) {
     for (let activity of record["activities"].split(",")) {
@@ -14,7 +15,7 @@ async function getDesiredActivities() {
       }
     }
   }
-  console.log(activities)
+  
   return activities;
 }
 
@@ -67,7 +68,7 @@ function calculateDistance(
   lon1: number,
   lat2: number,
   lon2: number,
-) {
+) { 
   // Radius of the Earth in km
   const R = 6371;
 
@@ -128,28 +129,34 @@ async function checkCompatibility(userId1: string, userId2: string) {
     return false;
   }
 
-  if (userRecord1["gender"] != "both" || userRecord1["gender"] != "both") {
+  if (userSearch1["preferenceGender"] != "both" || userSearch2["preferenceGender"] != "both") {
     if (userRecord1["gender"] != userSearch2["preferenceGender"]) {
+      console.log("userRecord1[gender] =/= userSearch2[preferenceGender]")
       return false;
     }
 
     if (userRecord2["gender"] != userSearch1["preferenceGender"]) {
+      console.log("userRecord2[gender] =/= userSearch1[preferenceGender]")
       return false;
     }
-  }
+  } 
 
-  if (
-    calculateDistance(
-      userRecord1["latitude"],
-      userRecord1["longitude"],
-      userRecord2["latitude"],
-      userRecord2["longitude"],
-    ) >
-    Math.max(
-      userSearch1["preferenceMaxRadius"],
-      userSearch2["preferenceMaxRadius"],
-    )
+  let dist = calculateDistance(
+    userRecord1["latitude"],
+    userRecord1["longitude"],
+    userRecord2["latitude"],
+    userRecord2["longitude"],
+  )
+
+  let maxViableDist = Math.max(
+    userSearch1["preferenceMaxRadius"],
+    userSearch2["preferenceMaxRadius"],
+  )
+
+  console.log(`Distance between ${userId1}, ${userId2} = ${dist}`)
+  if (dist >maxViableDist 
   ) {
+    
     return false;
   }
 
@@ -158,6 +165,7 @@ async function checkCompatibility(userId1: string, userId2: string) {
 
 async function curateFeed() {}
 
+
 //this should work.
 async function pairMatchmake() {
   //these are valid pairings
@@ -165,15 +173,16 @@ async function pairMatchmake() {
   //activity, pairs of ids
   let validPairings: { [key: string]: string[][] } = {};
 
-  let desiredActivities = getDesiredActivities();
-
-  let sortedActivities: [string, string[]][] =
-    Object.entries(desiredActivities);
+  let desiredActivities = await getDesiredActivities();
+  
+  let sortedActivities: [string, string[]][] =Object.entries(desiredActivities);
+  
   sortedActivities.sort((a, b) => b[1].length - a[1].length);
+  
   //sort by descending based on the number of ppl that wnat to do that activity.
 
-  for (let i = sortedActivities.length; i >= 0; i--) {
-    let currActivity = sortedActivities[i];
+  for (let i = sortedActivities.length-1; i >= 0; i--) {
+    let currActivity = sortedActivities[i]; 
     let userIds: string[] = currActivity[1];
 
     for (let i = 0; i < userIds.length; i++) {
@@ -184,7 +193,7 @@ async function pairMatchmake() {
           } else {
             validPairings[currActivity[0]] = [[userIds[i], userIds[j]]];
           }
-        }
+        } 
       }
     }
   }
@@ -275,7 +284,7 @@ async function matchmakingStartSearch(
       preferenceMinPeople: preferenceMinPeople,
     },
   });
-  console.log("hi")
+  
   return result; // Return the result which includes the added matchmaking preferences
 }
 
@@ -290,4 +299,4 @@ async function matchmakingStopsearch(userId: string) {
   });
 }
 
-export { matchmakingStartSearch, matchmakingStopsearch, pairMatchmake};
+export { calculateDistance, matchmakingStartSearch, matchmakingStopsearch, pairMatchmake};
