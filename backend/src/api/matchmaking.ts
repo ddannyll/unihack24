@@ -1,7 +1,72 @@
-import { group } from "console";
-import { prismaClient } from "./prisma.js";
-import { stringify } from "querystring";
+import { Request, Response, Router } from "express";
+import { prismaClient } from "../prisma.js";
+import betterJson from "../middleware/betterJson.js";
+import { randomUUID } from "crypto";
+ 
 
+///routes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes below
+///routes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes below
+///routes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes below
+///routes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes below
+///routes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes below
+const mmRoutes = Router();
+
+interface MatchmakingSearchSession {
+  userId: string;
+  activities: string[];
+  preferenceGender: "male" | "female" | "both";
+  preferenceMaxRadius: number;
+  preferenceMinPeople: number;
+}
+
+
+mmRoutes.post("/matchmaking/startsearch",betterJson,  async (req: Request, res: Response) => {
+  try {
+    const {
+      userId,
+      activities,
+      preferenceGender,
+      preferenceMaxRadius,
+      preferenceMinPeople,
+    } = req.body;
+
+    await matchmakingStartSearch(userId, activities, preferenceGender, preferenceMaxRadius, preferenceMinPeople);
+
+  
+     res.status(200).json({  });
+  } catch (error) {
+    console.error("Error starting matchmaking search:", error);
+    res.status(500).json({ error: "/matchmaking/startsearchInternal server error" });
+  }
+});
+
+mmRoutes.post("/matchmaking/stopsearch", betterJson, async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.body;
+
+    
+    await matchmakingStopsearch(userId)
+
+    
+    res.status(200).json({});
+  } catch (error) {
+    console.error("Error stopping matchmaking search:", error);
+    res.status(500).json({ error: "/matchmaking/stopsearch Internal server error" });
+  }
+});
+
+
+
+
+
+
+
+////functions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions below
+////functions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions below
+////functions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions below
+////functions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions below
+////functions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions below
+////functions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions belowfunctions below
 async function getDesiredActivities() { 
   let activities: { [key: string]: string[] } = {};
 
@@ -389,7 +454,7 @@ async function matchmakingStartSearch(
   let activitiesString = activities.join(",");
 
   // Add to the MMQueue
-  const result = await prismaClient.mMQueueElement.create({
+    await prismaClient.mMQueueElement.create({
     data: {
       userId: userId,
       activities: activitiesString,
@@ -398,9 +463,10 @@ async function matchmakingStartSearch(
       preferenceMinPeople: preferenceMinPeople,
     },
   });
-  
-  return result; // Return the result which includes the added matchmaking preferences
-}
+
+
+  //return
+ }
 
 //Cancel's a user's search for matchmaking.
 async function matchmakingStopsearch(userId: string) {
