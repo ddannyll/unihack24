@@ -1,105 +1,101 @@
-import { Link, useRouter } from "expo-router"
-import { useState } from "react"
-import { Button, Form, Input, Label, Text, View, styled } from "tamagui"
-import { useMutation } from '@tanstack/react-query';
+import { Link, useRouter } from "expo-router";
+import { useState } from "react";
+import { Button, Form, Input, Text, View } from "tamagui";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { authApiLogin } from "../../api/api";
 
-type LoginCredentials = {
-    email: string;
-    password: string;
-};
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const loginUser = async ({ email, password }: LoginCredentials) => {
-    try {
-        // 'https://yourapi.com/user/login' if you're in production, or
-        // 'http://localhost:3000/user/login' if you're in development.
-        // can do this using env file
-        return { userId: "3"}
-        const response = await fetch('http://localhost:3000/user/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email, password }),
-        });
+export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const router = useRouter();
 
-        console.log(response)
+  const [buttonEnabled, setButtonEnabled] = useState(true);
 
-        if (!response.ok) {
-            // If the server response is not ok, throw an error with the response status
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Login failed');
-        }
+  const queryClient = useQueryClient();
 
-        const data = await response.json();
-        return data;
-    } catch (err) {
-        console.error(err);
-        throw err;
-    }
-}
+  const loginMutation = useMutation({
+    mutationFn: ({ email, password }: { email: string; password: string }) => {
+      return authApiLogin({
+        email,
+        password,
+      });
+    },
+    onMutate: (variables) => {
+      setButtonEnabled(false);
+    },
 
-export default function Login() {    
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    onError: (error, variables, context) => {
+      //   Do some random shit here
+      return;
+    },
+    onSuccess: async (data, variables, context) => {
+      // Boom baby!
+      await AsyncStorage.setItem("token", data.token);
 
-    const router = useRouter();
+      console.log("todo-delete-user-data");
+      console.log(data);
 
+      //   moreover store the user in tanstack query
+      queryClient.setQueryData(["user"], data);
 
-    const handleSubmit = async () => {
-        const res = await loginUser({ email, password });
-        router.push('/(tabs)')
-    }
+      router.push("/(tabs)");
+    },
+    onSettled: (data, error, variables, context) => {
+      setButtonEnabled(true);
+    },
+  });
 
-    return (
-        <>
-            <View display="flex" justifyContent="center" alignItems="center" flex={1}>
-                <View>
+  const handleSubmit = async () => {
+    await loginMutation.mutate({
+      email: email,
+      password: password,
+    });
+  };
 
-                </View>
+  return (
+    <>
+      <View display="flex" justifyContent="center" alignItems="center" flex={1}>
+        <View></View>
 
-                <Form onSubmit={handleSubmit} alignItems="center" gap="$2">
-                    <Text fontSize="$9">SIGN IN</Text>
+        <Form onSubmit={handleSubmit} alignItems="center" gap="$2">
+          <Text fontSize="$9">SIGN IN</Text>
 
-                    <Input 
-                        id="email-input" 
-                        keyboardType="email-address" 
-                        placeholder="Email address" 
-                        width="$20"
-                        value={email}
-                        onChangeText={setEmail}
-                    />
-                    <Input 
-                        id="password-input" 
-                        placeholder="Password" 
-                        width="$20"
-                        value={password}
-                        onChangeText={setPassword}
-                    />
+          <Input
+            id="email-input"
+            keyboardType="email-address"
+            placeholder="Email address"
+            width="$20"
+            value={email}
+            onChangeText={setEmail}
+          />
+          <Input
+            id="password-input"
+            placeholder="Password"
+            width="$20"
+            value={password}
+            onChangeText={setPassword}
+          />
 
-                    <Button 
-                        backgroundColor="#0070f0" 
-                        color="white" 
-                        size="$3" 
-                        width="$20" 
-                        onPress={handleSubmit}
-                    >
-                        Continue
-                    </Button>
+          <Button
+            disabled={!buttonEnabled}
+            backgroundColor="#0070f0"
+            color="white"
+            size="$3"
+            width="$20"
+            onPress={handleSubmit}
+          >
+            Continue
+          </Button>
 
-                    <View display="flex" justifyContent="center">
-                        <Link href="/(auth)/register">
-                            <Text>Register Instead</Text>
-                        </Link>
-                    </View>
-
-                    {/* <View display="flex" justifyContent="center" alignItems="center" position="absolute">
-                        <Text>Don't have an account?</Text>
-                        <Link href="/forgotPassword">
-                            <Text>Register Here</Text>
-                        </Link>
-                    </View> */}
-                </Form>
-            </View>
-        </>
-    )
+          <View display="flex" justifyContent="center">
+            <Link href="/(auth)/forgotPassword">
+              <Text>Forgot Password?</Text>
+            </Link>
+          </View>
+        </Form>
+      </View>
+    </>
+  );
 }
