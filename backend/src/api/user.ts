@@ -7,6 +7,7 @@ import violateUniqueConstraint from "../helpers/violateUniqueConstraint.js";
 import notFound from "../helpers/notFound.js";
 import { exit } from "process";
 import { generateAccessToken } from "../helpers/authToken.js";
+import authenticateToken from "../middleware/auth.js";
 
 const userRoutes = Router();
 
@@ -90,42 +91,86 @@ interface userProfileUpdateParams {
   gender?: "male" | "female";
 }
 
-userRoutes.put("/", betterJson, async (req: Request, res: Response) => {
-  const info: userProfileUpdateParams = req.body;
-  let prev_details;
-  try {
-    prev_details = await prismaClient.user.findFirstOrThrow({
+userRoutes.put(
+  "/",
+  authenticateToken,
+  betterJson,
+  async (req: Request, res: Response) => {
+    const info: userProfileUpdateParams = req.body;
+    let prev_details;
+    try {
+      prev_details = await prismaClient.user.findFirstOrThrow({
+        where: {
+          userId: info.userId,
+        },
+      });
+    } catch (e) {
+      if (notFound(e as object)) {
+        res
+          .status(400)
+          .send({ error: "user does not exist with given userId" });
+        return;
+      } else {
+        console.error(e);
+        exit(1);
+      }
+    }
+
+    // prev details should not be null at this point
+    // user also exists at this point, so no need for catch
+    await prismaClient.user.update({
       where: {
         userId: info.userId,
       },
+      data: {
+        email: info.email ?? prev_details?.email,
+        bio: info.bio ?? prev_details?.bio,
+        profilePicture: info.profilePicture ?? prev_details?.profilePicture,
+        searching: info.searching ?? prev_details?.searching,
+        gender: info.gender ?? prev_details?.gender,
+      },
     });
-  } catch (e) {
-    if (notFound(e as object)) {
-      res.status(400).send({ error: "user does not exist with given userId" });
-      return;
-    } else {
-      console.error(e);
-      exit(1);
+
+    res.send({});
+  },
+);
+
+interface userLocationParams {
+  userId: string;
+  longitude: number;
+  latitude: number;
+}
+
+userRoutes.put(
+  "/location",
+  authenticateToken,
+  betterJson,
+  async (req: Request, res: Response) => {
+    const info: userLocationParams = req.body;
+
+    try {
+      await prismaClient.user.update({
+        where: {
+          userId: info.userId,
+        },
+        data: {
+          longitude: info.longitude,
+          latitude: info.latitude,
+        },
+      });
+    } catch (e) {
+      if (notFound(e as object)) {
+        res.status(400).send({ error: "user does not exist with given id" });
+        return;
+      } else {
+        console.error(e);
+        exit(1);
+      }
     }
-  }
 
-  // prev details should not be null at this point
-  // user also exists at this point, so no need for catch
-  await prismaClient.user.update({
-    where: {
-      userId: info.userId,
-    },
-    data: {
-      email: info.email ?? prev_details?.email,
-      bio: info.bio ?? prev_details?.bio,
-      profilePicture: info.profilePicture ?? prev_details?.profilePicture,
-      searching: info.searching ?? prev_details?.searching,
-      gender: info.gender ?? prev_details?.gender,
-    },
-  });
-
-  res.send({});
-});
+    res.send({});
+  },
+);
 
 userRoutes.get("/:userId", async (req: Request, res: Response) => {
   const userId = req.params.userId;
@@ -154,38 +199,6 @@ userRoutes.get("/:userId", async (req: Request, res: Response) => {
     searching: user?.searching,
     gender: user?.gender,
   });
-});
-
-interface userLocationParams {
-  userId: string;
-  longitude: number;
-  latitude: number;
-}
-
-userRoutes.put("/location", betterJson, async (req: Request, res: Response) => {
-  const info: userLocationParams = req.body;
-
-  try {
-    await prismaClient.user.update({
-      where: {
-        userId: info.userId,
-      },
-      data: {
-        longitude: info.longitude,
-        latitude: info.latitude,
-      },
-    });
-  } catch (e) {
-    if (notFound(e as object)) {
-      res.status(400).send({ error: "user does not exist with given id" });
-      return;
-    } else {
-      console.error(e);
-      exit(1);
-    }
-  }
-
-  res.send({});
 });
 
 export default userRoutes;
