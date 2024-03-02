@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { prismaClient } from "../prisma.js";
+import { prismaClient } from "../clients.js";
 import betterJson from "../middleware/betterJson.js";
 import { randomUUID } from "crypto";
 import notFound from "../helpers/notFound.js";
@@ -13,7 +13,7 @@ messageRoutes.get("/loadmessages/:userId", async (req, res) => {
 
   let meetup;
   try {
-    meetup = await prismaClient.meetup.findFirst({
+    meetup = await prismaClient.meetup.findFirstOrThrow({
       where: {
         meetupId: meetupId,
         users: {
@@ -58,7 +58,7 @@ messageRoutes.get("/messageList/:userId", async (req, res) => {
 
   let user;
   try {
-    user = await prismaClient.user.findFirst({
+    user = await prismaClient.user.findFirstOrThrow({
       where: {
         userId,
       },

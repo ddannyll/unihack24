@@ -2,8 +2,17 @@ import { Link, Tabs } from "expo-router";
 import { Pressable } from "react-native";
 import { Text, Button, View } from "tamagui";
 import { AntDesign } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
+import { userApiMe } from "../../api/api";
 
 export default function TabLayout() {
+  // fetch the user
+
+  const { isPending, error, data } = useQuery({
+    queryKey: ["userProfile"],
+    queryFn: () => userApiMe(),
+  });
+
   return (
     <Tabs
       screenOptions={{
@@ -18,7 +27,7 @@ export default function TabLayout() {
             <AntDesign name="home" size={20} color="black" />
           ),
           headerRight: () => (
-            <Link href="/login" asChild>
+            <Link href="/register" asChild>
               <Pressable>
                 <Text>Hello!</Text>
               </Pressable>

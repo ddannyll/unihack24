@@ -11,7 +11,7 @@ datasource db {
 }
 
 model User {
-  userId         String           @id
+  userId         String           @id @default(uuid())
   email          String           @unique
   hashPassword   String
   bio            String?
@@ -24,17 +24,33 @@ model User {
   selectedTags   Tag[] //This is their seleected tags. These are saved but they can change this whenever they start search
   Message        Message[]
   MMQueueElement MMQueueElement[]
+  notificationToken String        @default("")
 }
 
+<<<<<<< HEAD
 model Meetup {
   meetupId   String    @id
   users      User[]
   messages   Message[]
   meetupName String
+=======
+model Tag {
+  tagId      String @id @default(uuid())
+  name       String @unique
+  numberUsed Int    @default(0)
+  users      User[]
+}
+
+model Meetup {
+  meetupId String    @id @default(uuid())
+  users    User[]
+  messages Message[]
+  name     String
+>>>>>>> 7278932afe1323a2575297388751fc8a8765c77b
 }
 
 model Message {
-  messageId  String   @id
+  messageId  String   @id @default(uuid())
   message    String
   timeStamp  DateTime
   fromUser   User     @relation(fields: [fromUserId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
@@ -50,6 +66,7 @@ model MMQueueElement {
   preferenceGender    String
   preferenceMaxRadius Float
   preferenceMinPeople Int
+<<<<<<< HEAD
 }
 
 model Tag {
@@ -58,3 +75,13 @@ model Tag {
   User         User?   @relation(fields: [userUserId], references: [userId])
   userUserId   String?
 }
+=======
+}
+
+// model Activity {
+//   activityId     String         @id
+//   queueElement   MMQueueElement @relation(fields: [queueElementId], references: [MMQueueElementId])
+//   queueElementId String
+//   activityName   String
+// }
+>>>>>>> 7278932afe1323a2575297388751fc8a8765c77b

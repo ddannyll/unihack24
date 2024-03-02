@@ -32,8 +32,14 @@
     "axios": "^1.6.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
+    "expo-server-sdk": "^3.7.0",
     "express": "^4.18.3",
+<<<<<<< HEAD
     "firebase": "^10.8.1",
+=======
+    "firebase-admin": "^12.0.0",
+    "i": "^0.3.7",
+>>>>>>> 7278932afe1323a2575297388751fc8a8765c77b
     "jsonwebtoken": "^9.0.2",
     "request": "^2.88.2",
     "request-promise-native": "^1.0.9"

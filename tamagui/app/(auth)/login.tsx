@@ -1,8 +1,8 @@
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Button, Form, Input, Text, View } from "tamagui";
-import { useMutation } from "@tanstack/react-query";
-import { userApiLogin } from "../../api/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { authApiLogin } from "../../api/api";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -13,9 +13,11 @@ export default function Login() {
 
   const [buttonEnabled, setButtonEnabled] = useState(true);
 
+  const queryClient = useQueryClient();
+
   const loginMutation = useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) => {
-      return userApiLogin({
+      return authApiLogin({
         email,
         password,
       });
@@ -31,6 +33,13 @@ export default function Login() {
     onSuccess: async (data, variables, context) => {
       // Boom baby!
       await AsyncStorage.setItem("token", data.token);
+
+      console.log("todo-delete-user-data");
+      console.log(data);
+
+      //   moreover store the user in tanstack query
+      queryClient.setQueryData(["user"], data);
+
       router.push("/(tabs)");
     },
     onSettled: (data, error, variables, context) => {
