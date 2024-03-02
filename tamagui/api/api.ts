@@ -36,6 +36,18 @@ export const authApiLogin = async (user: {
   return response.data;
 };
 
+export const authApiRegister = async (user: {
+  email: string;
+  password: string;
+  gender: string;
+}) => {
+  const response = await authApi.post<{
+    userId: string;
+    token: string;
+  }>("user/register", user);
+  return response.data;
+};
+
 // ********* MESSAGE API ********* //
 
 export const messageApi = axios.create({

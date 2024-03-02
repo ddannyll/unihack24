@@ -27,7 +27,7 @@ export default function TabLayout() {
             <AntDesign name="home" size={20} color="black" />
           ),
           headerRight: () => (
-            <Link href="/login" asChild>
+            <Link href="/register" asChild>
               <Pressable>
                 <Text>Hello!</Text>
               </Pressable>

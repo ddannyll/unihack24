@@ -17,27 +17,21 @@ model User {
   bio            String?
   profilePicture String?
   searching      Boolean          @default(false)
-  tags           Tag[]
   longitude      Float            @default(0)
   latitude       Float            @default(0)
   gender         String
   meetups        Meetup[]
-  message        Message[]
+  selectedTags   Tag[] //This is their seleected tags. These are saved but they can change this whenever they start search
+  Message        Message[]
   MMQueueElement MMQueueElement[]
-}
-
-model Tag {
-  tagId      String @id @default(uuid())
-  name       String @unique
-  numberUsed Int    @default(0)
-  users      User[]
+  notificationToken String        @default("")
 }
 
 model Meetup {
-  meetupId String    @id @default(uuid())
-  users    User[]
-  messages Message[]
-  name     String
+  meetupId   String    @id
+  users      User[]
+  messages   Message[]
+  meetupName String
 }
 
 model Message {
@@ -59,9 +53,9 @@ model MMQueueElement {
   preferenceMinPeople Int
 }
 
-// model Activity {
-//   activityId     String         @id
-//   queueElement   MMQueueElement @relation(fields: [queueElementId], references: [MMQueueElementId])
-//   queueElementId String
-//   activityName   String
-// }
+model Tag {
+  name         String  @id @unique
+  numSearching Int     @default(0) //number of people currently searching for this tag. 
+  User         User?   @relation(fields: [userUserId], references: [userId])
+  userUserId   String?
+}
