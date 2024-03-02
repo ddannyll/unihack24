@@ -34,9 +34,6 @@ export default function Login() {
       // Boom baby!
       await AsyncStorage.setItem("token", data.token);
 
-      console.log("todo-delete-user-data");
-      console.log(data);
-
       //   moreover store the user in tanstack query
       queryClient.setQueryData(["user"], data);
 

@@ -136,7 +136,6 @@ userRoutes.put(
 );
 
 interface userLocationParams {
-  userId: string;
   longitude: number;
   latitude: number;
 }
@@ -147,11 +146,11 @@ userRoutes.put(
   betterJson,
   async (req: Request, res: Response) => {
     const info: userLocationParams = req.body;
-
+    console.debug("update");
     try {
       await prismaClient.user.update({
         where: {
-          userId: info.userId,
+          userId: req.userId,
         },
         data: {
           longitude: info.longitude,

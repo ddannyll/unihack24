@@ -1,11 +1,119 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { H1, H3, Spinner, Switch, Text, View, YStack } from "tamagui";
 import { SwitchWithLabel } from "../../components/switchWithLabel";
 
+import * as Location from "expo-location";
+import { useMutation } from "@tanstack/react-query";
+import { userApiLocation } from "../../api/api";
+import {
+  BACKGROUND_LOCATION_TRACKER,
+  LOCATION_UPDATE,
+  locationEmitter,
+} from "../../tasks";
+
 export default function MainSearchToggleScreen() {
+  const loginMutation = useMutation({
+    mutationFn: ({
+      latitude,
+      longitude,
+    }: {
+      latitude: number;
+      longitude: number;
+    }) => {
+      return userApiLocation({
+        latitude,
+        longitude,
+      });
+    },
+    onMutate: (variables) => {
+      // do something here?
+    },
+
+    onError: (error, variables, context) => {
+      //   Do some random shit here
+      return;
+    },
+    onSuccess: async (data, variables, context) => {
+      // do something here?
+      console.log("hahaha", data);
+    },
+    onSettled: (data, error, variables, context) => {},
+  });
+
+  // check if user has location on
+  const [location, setLocation] = useState<{
+    location: Location.LocationObject;
+    updatedAt: Date;
+  } | null>(null);
+
+  const [permission, setPermission] =
+    useState<Location.PermissionStatus | null>(null);
+
+  const locationFetcher = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    setPermission(status);
+    if (status !== "granted") {
+      return;
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+    setLocation({ location: location, updatedAt: new Date() });
+
+    // start background location tracking
+
+    await Location.startLocationUpdatesAsync(BACKGROUND_LOCATION_TRACKER, {
+      accuracy: Location.LocationAccuracy.BestForNavigation,
+      timeInterval: 2000,
+      distanceInterval: 0,
+      deferredUpdatesInterval: 0,
+      deferredUpdatesDistance: 0,
+      // showsBackgroundLocationIndicator: true,
+    });
+
+    locationEmitter.on(LOCATION_UPDATE, (locationData) => {
+      console.log(
+        "locationEmitter locationUpdate fired! locationData: ",
+        locationData
+      );
+    });
+  };
+
+  // useCallback location
+  const locationFetcherCallback = useCallback(locationFetcher, [
+    setLocation,
+    setPermission,
+  ]);
+
+  // everytime the location changes, we want to update the backend
+  useEffect(() => {
+    if (location && permission === Location.PermissionStatus.GRANTED) {
+      loginMutation.mutate({
+        latitude: location.location.coords.latitude,
+        longitude: location.location.coords.longitude,
+      });
+    }
+  }, [location, permission]);
+
+  // on render check if location is on
+  // if not, show a prompt to turn on location
   const [isSearching, setSearching] = useState(false);
+
+  useEffect(() => {
+    if (isSearching) {
+      // check if location is on
+      locationFetcherCallback();
+    } else {
+      // unregister background location tracking
+      Location.stopLocationUpdatesAsync(BACKGROUND_LOCATION_TRACKER);
+    }
+  }, [isSearching]);
+
   return (
     <View flex={1} alignItems="center" p="$4">
+      <View backgroundColor={"$backgroundStrong"} height={100}>
+        <Text>locationpermission: {permission}</Text>
+      </View>
+
       <SearchingPrompt
         isSearching={isSearching}
         onSearchToggle={() => {
