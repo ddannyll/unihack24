@@ -23,7 +23,8 @@ export const userApi = axios.create({
   baseURL: BASE_URL,
 });
 
-export const signUpUserFn = async (user: {
+// Functions
+export const userApiLogin = async (user: {
   email: string;
   password: string;
 }) => {
