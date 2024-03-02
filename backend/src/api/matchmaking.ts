@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
 import { prismaClient } from "../prisma.js";
 import betterJson from "../middleware/betterJson.js";
-import { randomUUID } from "crypto";
+// import { randomUUID } from "crypto";
  
 
 ///routes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes belowroutes below
@@ -440,6 +440,7 @@ async function matchmakingLoop(){
   }
 }
 
+
 //Adds a user & their preferences to the matchmaking queue 
 async function matchmakingStartSearch(
   userId: string,
@@ -476,5 +477,16 @@ async function matchmakingStopsearch(userId: string) {
     },
   });
 }
+
+
+async function acceptMatch(userId: string){
+
+}
+
+
+async function declineMatch(userId: string){
+
+}
+
 
 export { calculateDistance,multiMatchmake, matchmakingLoop, matchmakingStartSearch, matchmakingStopsearch, pairMatchmake};
