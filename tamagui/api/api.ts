@@ -91,6 +91,16 @@ export const userApiLocation = async ({
     longitude,
   });
   return response.data;
-};
+}; 
 
-// 
+
+//lol
+
+export const selectTagApi = async (
+  userId: string,
+  tagName: string,
+) => {
+  const response = await authApi.post("tags/selecttag", {userId: userId, tagName: tagName});
+  return response.data;
+};
+  
