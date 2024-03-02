@@ -14,12 +14,13 @@ model User {
   userId         String           @id @default(uuid())
   email          String           @unique
   hashPassword   String
+  name           String?
   bio            String?
   profilePicture String?
   searching      Boolean          @default(false)
   longitude      Float            @default(0)
   latitude       Float            @default(0)
-  gender         String
+  gender         String?
   meetups        Meetup[]
   selectedTags   Tag[] //This is their seleected tags. These are saved but they can change this whenever they start search
   Message        Message[]

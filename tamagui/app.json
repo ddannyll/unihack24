@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "expo-router-example",
-    "slug": "expo-router-example",
+    "slug": "unihack24",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -12,15 +12,23 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.k0ffe1ne.unihack24"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "package": "com.k0ffe1ne.unihack24"
     },
     "web": {
       "bundler": "metro",
@@ -39,6 +47,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "08078ce8-1040-41d0-8f40-4b58a5f14a8f"
+      }
+    },
+    "owner": "k0ffe1ne"
   }
 }

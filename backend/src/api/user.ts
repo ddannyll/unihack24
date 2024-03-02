@@ -14,7 +14,6 @@ const userRoutes = Router();
 interface userRegisterParams {
   email: string;
   password: string;
-  gender: "male" | "female";
 }
 
 userRoutes.post(
@@ -30,7 +29,6 @@ userRoutes.post(
           userId,
           email: info.email,
           hashPassword: hashPassword(info.password),
-          gender: info.gender,
         },
       });
     } catch (e) {
@@ -84,6 +82,7 @@ userRoutes.post("/login", betterJson, async (req: Request, res: Response) => {
 
 interface userProfileUpdateParams {
   userId: string;
+  name?: string;
   email?: string;
   bio?: string;
   profilePicture?: string;
@@ -123,6 +122,7 @@ userRoutes.put(
         userId: info.userId,
       },
       data: {
+        name: info.name ?? prev_details?.name,
         email: info.email ?? prev_details?.email,
         bio: info.bio ?? prev_details?.bio,
         profilePicture: info.profilePicture ?? prev_details?.profilePicture,
@@ -197,6 +197,7 @@ userRoutes.get(
     }
 
     res.send({
+      name: user?.name ?? "",
       email: user?.email,
       bio: user?.bio ?? "",
       profilePicture: user?.profilePicture ?? "",
@@ -227,6 +228,7 @@ userRoutes.get("/:userId", async (req: Request, res: Response) => {
   }
 
   res.send({
+    name: user?.name ?? "",
     email: user?.email,
     bio: user?.bio ?? "",
     profilePicture: user?.profilePicture ?? "",
