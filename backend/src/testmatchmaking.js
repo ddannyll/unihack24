@@ -1,7 +1,7 @@
 import { prismaClient } from "./prisma.ts";
 import {
     calculateDistance, matchmakingStartSearch,
-  matchmakingStopsearch, pairMatchmake
+  matchmakingStopsearch, pairMatchmake,multiMatchmake
 } from "./matchmaking.ts";
 
 
@@ -35,8 +35,7 @@ async function addUser(userId, email, gender, lat, long){
           gender: gender,
           hashPassword: "test"
         },
-      });
-  
+    }); 
 }
  
  
@@ -61,8 +60,11 @@ for (let rec of allRecords){
     await matchmakingStartSearch(rec['userId'], activities, "both", 2003,2)
 }
 
-console.log(await pairMatchmake())
+// let res = await pairMatchmake();
+// console.log(`Pair matchmaking:`)
+// console.log(res)
 
- 
+console.log(await multiMatchmake())
+
 
 //node --loader ts-node/esm testmatchmaking.js
