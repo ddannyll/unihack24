@@ -1,59 +1,10 @@
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
-import { Button, Form, Input, Label, Text, View, styled } from "tamagui";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { Button, Form, Input, Text, View } from "tamagui";
+import { useMutation } from "@tanstack/react-query";
 import { signUpUserFn } from "../../api/authApi";
 
-type LoginCredentials = {
-  email: string;
-  password: string;
-};
-
-const loginUser = async ({ email, password }: LoginCredentials) => {
-  try {
-    // 'https://yourapi.com/user/login' if you're in production, or
-    // 'http://localhost:3000/user/login' if you're in development.
-    // can do this using env file
-    // return { userId: "3"}
-
-    // const {
-    //   mutate: loginUser,
-    //   isLoading,
-    //   isError,
-    //   error,
-    //   isSuccess,
-    // } = useMutation({}
-    //   (userData: { email: string; password: string }) => signUpUserFn(userData),
-    //   {
-    //     onSuccess: () => {
-    //       query.refetch();
-    //     },
-    //   }
-    // );
-
-    // const response = await fetch('http://localhost:3000/user/login', {
-    //     method: 'POST',
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({ email, password }),
-    // });
-
-    // console.log(response);
-
-    // if (!response.ok) {
-    //   // If the server response is not ok, throw an error with the response status
-    //   const errorData = await response.json();
-    //   throw new Error(errorData.error || "Login failed");
-    // }
-
-    // const data = await response.json();
-    return data;
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
-};
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -77,8 +28,9 @@ export default function Login() {
       //   Do some random shit here
       return;
     },
-    onSuccess: (data, variables, context) => {
+    onSuccess: async (data, variables, context) => {
       // Boom baby!
+      await AsyncStorage.setItem("token", data.token);
       router.push("/(tabs)");
     },
     onSettled: (data, error, variables, context) => {
@@ -87,7 +39,7 @@ export default function Login() {
   });
 
   const handleSubmit = async () => {
-    const res = await loginMutation.mutate({
+    await loginMutation.mutate({
       email: email,
       password: password,
     });
@@ -133,13 +85,6 @@ export default function Login() {
               <Text>Forgot Password?</Text>
             </Link>
           </View>
-
-          {/* <View display="flex" justifyContent="center" alignItems="center" position="absolute">
-                        <Text>Don't have an account?</Text>
-                        <Link href="/forgotPassword">
-                            <Text>Register Here</Text>
-                        </Link>
-                    </View> */}
         </Form>
       </View>
     </>
