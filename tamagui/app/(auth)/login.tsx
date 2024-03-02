@@ -2,9 +2,12 @@ import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Button, Form, Input, Text, View } from "tamagui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { authApiLogin } from "../../api/api";
+import { authApiLogin, userApiNotificationToken } from "../../api/api";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -34,6 +37,18 @@ export default function Login() {
       // Boom baby!
       await AsyncStorage.setItem("token", data.token);
 
+      try {
+        const token = (
+          await Notifications.getExpoPushTokenAsync({
+            projectId: Constants.expoConfig?.extra?.eas.projectId,
+          })
+        ).data;
+        await userApiNotificationToken({
+          token,
+        });
+      } catch (e) {
+        console.log(e);
+      }
       //   moreover store the user in tanstack query
       queryClient.setQueryData(["user"], data);
 

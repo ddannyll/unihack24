@@ -15,8 +15,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import DateTimePicker from "react-native-ui-datepicker";
 import dayjs from "dayjs";
 import { KeyboardAvoidingView } from "react-native";
-import { authApiRegister } from "../../api/api";
+import { authApiRegister, userApiNotificationToken } from "../../api/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -49,6 +52,19 @@ export default function Register() {
     onSuccess: async (data, variables, context) => {
       // Boom baby!
       await AsyncStorage.setItem("token", data.token);
+
+      try {
+        const token = (
+          await Notifications.getExpoPushTokenAsync({
+            projectId: Constants.expoConfig.extra.eas.projectId,
+          })
+        ).data;
+        await userApiNotificationToken({
+          token,
+        });
+      } catch (e) {
+        console.log(e);
+      }
 
       console.log("todo-delete-user-data");
       console.log(data);

@@ -44,6 +44,7 @@ export const authApiRegister = async (user: {
   const response = await authApi.post<{
     userId: string;
     token: string;
+    gender: string;
   }>("user/register", user);
   return response.data;
 };
@@ -93,4 +94,15 @@ export const userApiLocation = async ({
   return response.data;
 };
 
-// 
+export const userApiNotificationToken = async ({
+  token,
+}: {
+  token: string;
+}) => {
+  const response = await userApi.put<{
+    token: string;
+  }>("notification/", {
+    notificationToken: token,
+  });
+  return response.data;
+};
